@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: radial-gradient(circle at 50% 20%, #1e1338 0%, #0d091a 60%, #06040d 100%);
+    min-height: 100vh;
+    color: #f3f4f6;
+  }
+}
+
+/* Glassmorphism Cosmic Cards */
+.cosmic-card {
+  background: rgba(23, 18, 43, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cosmic-card-glow {
+  background: rgba(30, 23, 56, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  box-shadow: 
+    0 0 30px -5px rgba(168, 85, 247, 0.35),
+    0 12px 40px 0 rgba(0, 0, 0, 0.6), 
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.cosmic-card-pink {
+  background: rgba(43, 18, 35, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 117, 151, 0.45);
+  box-shadow: 
+    0 0 30px -5px rgba(255, 117, 151, 0.4),
+    0 12px 40px 0 rgba(0, 0, 0, 0.6), 
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Cosmic Neon Buttons */
+.cosmic-btn-primary {
+  background: linear-gradient(135deg, #ff7597 0%, #a855f7 100%);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 0 20px rgba(255, 117, 151, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cosmic-btn-primary:hover {
+  box-shadow: 0 0 35px rgba(255, 117, 151, 0.8), 0 0 15px rgba(168, 85, 247, 0.6);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.cosmic-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.cosmic-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cosmic-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(192, 132, 252, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
+  transform: translateY(-2px);
+}
+
+.cosmic-btn-secondary:active {
+  transform: translateY(1px);
+}
+
+/* Starlight Glows */
+.text-glow-pink {
+  text-shadow: 0 0 16px rgba(255, 117, 151, 0.6);
+}
+
+.text-glow-purple {
+  text-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 16px rgba(255, 209, 102, 0.6);
+}

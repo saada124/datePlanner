@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  background-color: #fcfaf6;
+  background-image: 
+    radial-gradient(#eedfcb 8%, transparent 9%),
+    radial-gradient(#eedfcb 8%, transparent 9%);
+  background-size: 36px 36px;
+  background-position: 0 0, 18px 18px;
+  min-height: 100vh;
+  color: #2b231f;
+}
+
+/* Thermal receipt paper zigzag tear edge */
+.receipt-jagged-bottom {
+  background-image: linear-gradient(135deg, #fffff8 50%, transparent 50%),
+                    linear-gradient(225deg, #fffff8 50%, transparent 50%);
+  background-position: bottom left;
+  background-repeat: repeat-x;
+  background-size: 14px 10px;
+}
+
+/* Elegant bistro gold highlight */
+.bistro-gold-border {
+  border-image: linear-gradient(to bottom, #d4af37, #f3e5ab, #aa7c11) 1;
+}
+
+/* French café menu subtle hover effect */
+.menu-item-hover {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+}
+.menu-item-hover:hover {
+  transform: translateY(-2px);
+}

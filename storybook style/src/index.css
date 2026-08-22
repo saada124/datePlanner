@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #fcf8f2;
+    background-image: 
+      radial-gradient(#e8dcce 0.75px, transparent 0.75px), 
+      radial-gradient(#e8dcce 0.75px, #fcf8f2 0.75px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    min-height: 100vh;
+    color: #2c2f38;
+  }
+}
+
+/* Storybook Paper & Card Effects */
+.paper-card {
+  background-color: #fdfbf7;
+  border: 1px solid #ebdcd0;
+  box-shadow: 0 10px 30px -4px rgba(107, 79, 58, 0.08), 0 4px 12px -2px rgba(107, 79, 58, 0.04);
+  position: relative;
+}
+
+.paper-card-rose {
+  background-color: #fdf8f9;
+  border: 1px solid #f2d8dc;
+  box-shadow: 0 10px 30px -4px rgba(199, 110, 123, 0.1), 0 4px 12px -2px rgba(199, 110, 123, 0.05);
+}
+
+.paper-deckle {
+  position: relative;
+  background-color: #fdfbf7;
+}
+
+/* Washi Tape Strip */
+.washi-tape {
+  position: absolute;
+  height: 18px;
+  background: rgba(235, 185, 192, 0.65);
+  border-left: 2px dashed rgba(255, 255, 255, 0.6);
+  border-right: 2px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transform: rotate(-2deg);
+  z-index: 10;
+}
+
+.washi-tape-sage {
+  background: rgba(182, 204, 184, 0.65);
+  transform: rotate(2deg);
+}
+
+/* Wax Seal Stamp */
+.wax-seal {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #e2959f, #b34a58);
+  border: 2px solid #8e2b38;
+  box-shadow: 0 4px 12px rgba(179, 74, 88, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fffdf0;
+  font-family: 'Playfair Display', serif;
+  font-weight: bold;
+}
+
+/* Custom handwriting font utility */
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-serif-title {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Smooth Story Buttons */
+.story-btn-primary {
+  background: linear-gradient(135deg, #e2959f 0%, #cf7583 100%);
+  color: #ffffff;
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(226, 149, 159, 0.4);
+  transition: all 0.25s ease;
+}
+
+.story-btn-primary:hover {
+  background: linear-gradient(135deg, #d8818c 0%, #be6270 100%);
+  box-shadow: 0 6px 20px rgba(226, 149, 159, 0.55);
+  transform: translateY(-2px);
+}
+
+.story-btn-primary:active {
+  transform: translateY(1px);
+}
+
+.story-btn-secondary {
+  background-color: #ffffff;
+  color: #2c2f38;
+  border: 1px solid #e8dcce;
+  border-radius: 9999px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.story-btn-secondary:hover {
+  background-color: #fdfaf5;
+  border-color: #d9c8b7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.story-btn-secondary:active {
+  transform: translateY(1px);
+}
