@@ -17,6 +17,8 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 | Island Getaway | `island style/` | Animal Crossing style flight trip: dialogues, pocket inventory, drinks, and a downloadable Boarding Pass |
 | Café & Bistro | `cafe style/` | A French café menu: pick items like ordering food, get a printed receipt at the end |
 
+**Please note:** **Midnight** is the only stable version right now. The Café and Mixtape versions were purely vibe-coded and still need some changes and fixes — expect a few rough spots.
+
 ## Screenshots 📸
 
 ### 🎮 Retro RPG
@@ -72,6 +74,8 @@ When she confirms the date, the plan is emailed through [FormSubmit](https://for
 
 The watercolor version can play a personal voice message:
 
+> ⚠️ This feature is still under construction and may not work perfectly yet.
+
 1. Save your recording as `watercolor/public/audio/voice-note.mp3`.
 2. That's it — the record player appears by itself.
 3. To hide it, open `watercolor/src/config/appConfig.ts` and set `voiceNote.src` to `''`.
@@ -93,6 +97,11 @@ The watercolor version can play a personal voice message:
 - **PRESS RECORD finale** — recording counter, confetti, and a downloadable mixtape cover image.
 - **Liner notes** — the love letter opens as the tape's liner notes.
 
+## Roadmap 🚧
+
+- This project is still being worked on — expect hotfixes, updates, and new styles for everyone.
+- **Next big thing:** a platform to host all the styles. The sender will pick a style and generate a link to send to the receiver — no code editing needed. That will make things much easier for new users.
+
 ## Project structure (same in every version)
 
 ```
@@ -106,4 +115,6 @@ src/
 
 ## Deployment
 
-`npm run build` creates a static site in `dist/`. Host it anywhere: Vercel, Netlify, GitHub Pages, etc.
+Right now I highly suggest using **[Netlify](https://www.netlify.com)** — simple and quick.
+
+`npm run build` creates a static site in `dist/`, so any static host works too (Vercel, GitHub Pages, etc.).
