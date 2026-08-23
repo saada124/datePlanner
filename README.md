@@ -1,95 +1,109 @@
 # Pixel Art Date Website 🎮❤️
 
-Eight fully self-contained variants of an interactive "plan our date" website — a pixel-art quest, a cosmic midnight adventure, a storybook invitation, a watercolor daydream, a Windows 95 installer parody, a cassette-tape mixtape, an Animal Crossing island getaway, and a cozy French bistro café menu. The person asked "will you go on a date with me?" picks every detail (day, time, activities, location, drink, greeting), gets a confirmation card, and the plan is emailed to you.
+This repo has 8 versions of a "plan our date" website. She picks the day, time, activities, place, drink, and greeting. When she confirms, the full plan is emailed to you.
 
-Each variant is an independent **React 19 + TypeScript + Vite + Tailwind + Framer Motion** project with its own `appConfig.ts` — clone, edit the config, build, done.
+Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motion** project with its own config file (`src/config/appConfig.ts`). Clone it, edit one file, build it — done.
 
-## Variants
+## Versions
 
-| Variant | Folder | Vibe |
+| Version | Folder | What it looks like |
 |---|---|---|
-| Retro RPG | `retro style/` | 8-bit quest with inventory, XP, an "EYYYYYY" button and Tunisian inside jokes |
-| Midnight | `midnight style/` | Cosmic stargazing theme, pre-filled starlight plan, downloadable VIP pass |
-| Storybook | `storybook style/` | Vintage paper storybook, chapters, wax seal letter, downloadable invitation card |
-| Watercolor | `watercolor/` | Dreamy pastel blobs, painterly copy, spinning-record voice note player |
-| Windows 95 | `win95 style/` | LoveOS 95 "date-setup.exe" installer: boot splash, draggable windows, BSOD tantrum, Windows License ticket |
-| Date Mixtape | `mixtape/` | Cassette-tape theme: spinning reels deck with play/rewind/fast-forward, tracklist wizard, J-card wrap-up, PRESS RECORD finale |
-| Island Getaway | `island style/` | Animal Crossing / Dodo Airlines flight charter: Nook dialogues, pocket inventory picker, Brewster's Roost drinks, and downloadable Boarding Pass |
-| Café & Bistro | `cafe style/` | French bistro à la carte menu, porcelain clinks, typewriter clicks, compulsory receipt stamp & downloadable thermal bill |
+| Retro RPG | `retro style/` | An 8-bit quest with items, XP, an "EYYYYYY" button and inside jokes |
+| Midnight | `midnight style/` | Stars and night sky theme. Comes with a pre-filled plan and a downloadable VIP pass |
+| Storybook | `storybook style/` | An old paper storybook with chapters and a wax seal letter. Invitation card included |
+| Watercolor | `watercolor/` | Soft pastel colors and calm text. Plays your voice note like a record player |
+| Windows 95 | `win95 style/` | A fake "date-setup.exe" installer: boot screen, windows you can drag, a BSOD joke, and a license ticket |
+| Date Mixtape | `mixtape/` | A cassette tape: spinning reels, play / rewind / fast-forward buttons, and a tracklist for the date |
+| Island Getaway | `island style/` | Animal Crossing style flight trip: dialogues, pocket inventory, drinks, and a downloadable Boarding Pass |
+| Café & Bistro | `cafe style/` | A French café menu: pick items like ordering food, get a printed receipt at the end |
+
+## Screenshots 📸
+
+### 🎮 Retro RPG
+![Retro RPG](docs/screenshots/retro.png)
+
+### 🌌 Midnight
+![Midnight](docs/screenshots/midnight.png)
+
+### 🎨 Watercolor
+![Watercolor](docs/screenshots/watercolor.png)
+
+### 🖥️ Windows 95
+![Windows 95](docs/screenshots/win95.png)
+
+### 🏝️ Island Getaway
+![Island Getaway](docs/screenshots/island.png)
+
+### ☕ Café & Bistro
+![Café & Bistro](docs/screenshots/cafe.png)
 
 ## Quick Start
 
 ```bash
-cd "cafe style"       # or "island style" / "retro style" / "midnight style" / "storybook style" / "watercolor" / "win95 style" / "mixtape"
+cd "retro style"      # or "midnight style" / "storybook style" / "watercolor" / "win95 style" / "mixtape" / "island style" / "cafe style"
 npm install
-npm run dev          # local dev server (Vite)
-npm run build        # type-check + production build → dist/
-npm run preview      # preview the production build
+npm run dev          # start the local server
+npm run build        # production build → dist/
+npm run preview      # preview the build
 ```
 
-## Customization — everything lives in `src/config/appConfig.ts`
+## Customize — edit one file
 
-Each variant reads ALL content from its own `src/config/appConfig.ts`. Edit this one file to make it yours:
+Everything you can change lives in `src/config/appConfig.ts`:
 
-- **Names** — `NAMES` / `girlfriendName` / `boyfriendName` (used everywhere: titles, letters, taunts, downloaded ticket filenames)
-- **Dates** — `dateRange` (the 7 selectable days) plus the free-text range descriptions
-- **Choices** — `timeSlots`, `activities`, `locations`, `drinks`, `greetings` (labels, emojis, descriptions, tags)
-- **Custom options** — `customLocationId`, `customDrinkId`, `customTimeId`, `isCustom` flags (retro) — detected by id, never by string matching
-- **Flavor text** — taunts for the evasive button, secret love letter, greetings, cover copy
-- **Email prefill** — `prefillEmail`: shows in the ⚙️ settings modal the first time (until the visitor's own email is saved in localStorage)
+- **Names** — yours and hers, used in titles, letters, and downloaded files
+- **Dates** — the 7 days she can pick from, plus free-text date ranges
+- **Choices** — time slots, activities, places, drinks, greetings
+- **Text** — jokes for the "NO" button, the secret love letter, cover text
+- **Your email** — `prefillEmail` shows in the ⚙️ settings modal the first time
 
-TypeScript types (`DateOption`, `TimeSlotOption`, `LocationOption`, ...) keep every field checked at build time — if you rename an id, tsc tells you where you broke the logic.
+TypeScript checks every field, so if you rename something wrong, the build tells you.
 
 ## The Email Feature ⚙️
 
-When the date is confirmed, the full plan is emailed via [FormSubmit](https://formsubmit.co) (ajax endpoint):
+When she confirms the date, the plan is emailed through [FormSubmit](https://formsubmit.co):
 
-- Click the ⚙️ **Settings** button (top-right) to set the recipient email — it's saved in `localStorage` under `dateAppEmail`.
-- If no valid email is set when they hit CONFIRM, the settings modal opens automatically and the app proceeds once a valid email is saved.
-- **First email only:** FormSubmit sends a one-time activation confirmation to the recipient email — click it once and all submissions arrive after that.
-- Sending code: `src/utils/emailService.ts` (`sendAutomatedDateEmail(selection, recipientEmail)`).
-- Downloadable ticket/card filenames already include the couple names from the config (e.g. `{Girlfriend}_{Boyfriend}_VIP_Date_Ticket_2026-08-17.png`).
+- She clicks the ⚙️ **Settings** button to enter your email (saved on her device).
+- If no email is set, the settings window opens by itself before confirming.
+- **First time only:** FormSubmit sends you a one-time activation link. Click it once and future emails arrive normally.
+- The sending code is in `src/utils/emailService.ts`.
 
-## Voice Note 🎙️ (watercolor variant)
+## Voice Note 🎙️ (watercolor)
 
-The watercolor variant plays a personal voice message on the cover and the finale:
+The watercolor version can play a personal voice message:
 
-1. Record a short message and save it as `watercolor/public/audio/voice-note.mp3`.
-2. That's it — the spinning-record player appears automatically.
-3. Edit the card's title/subtitle or hide the feature entirely in `watercolor/src/config/appConfig.ts` → `voiceNote` (set `src: ''` to hide).
+1. Save your recording as `watercolor/public/audio/voice-note.mp3`.
+2. That's it — the record player appears by itself.
+3. To hide it, open `watercolor/src/config/appConfig.ts` and set `voiceNote.src` to `''`.
 
-## Windows 95 Extras 🖥️ (win95 variant)
+## Windows 95 Extras 🖥️
 
-The Win95 variant is a "date-setup.exe" parody with a few extra surprises:
+- **Boot splash** — LoveOS 95 startup before the desktop.
+- **Draggable windows** — move them around; closing is denied ("date setup in progress").
+- **BSOD joke** — click "NO ❌" 5 times: blue screen, then the NO button disappears forever.
+- **Desktop icons** — Date Wizard 💘, README.TXT 📄, Recycle Bin 🗑️, My Computer 🖥️.
+- **Taskbar** — live clock and a pulsing START button.
+- **License ticket** — a downloadable `{Girlfriend}_{Boyfriend}_Windows_License_{date}.png`.
 
-- **Boot splash** — LoveOS 95 startup sequence before the desktop.
-- **Draggable windows** — grab any title bar and drag it around; closing a window is always denied ("date setup in progress").
-- **BSOD tantrum** — try to click "NO ❌" 5 times and the whole screen blue-screens for a moment… and then the NO button is gone forever.
-- **Desktop icons** — Date Wizard 💘, README.TXT 📄 (unlocks after the date is installed), Recycle Bin 🗑️ and My Computer 🖥️ with joke dialogs.
-- **Taskbar** — live clock, pulsing START while the wizard is open, and a tray chime.
-- **Windows License ticket** — a downloadable `{Girlfriend}_{Boyfriend}_Windows_License_{date}.png` certificate of date ownership.
+## Date Mixtape Extras 📼
 
-## Date Mixtape Extras 📼 (mixtape variant)
+- **Cassette deck** — spinning reels with play / pause / rewind / fast-forward that really change tracks.
+- **Tracklist wizard** — each date choice is a track (The When, The Vibe, The Scene...).
+- **J-card wrap-up** — the plan shows up as the cassette's insert card.
+- **PRESS RECORD finale** — recording counter, confetti, and a downloadable mixtape cover image.
+- **Liner notes** — the love letter opens as the tape's liner notes.
 
-The mixtape variant is a cassette-tape "record our date" experience:
-
-- **Cassette deck player** — spinning reels, play/pause, rewind and fast-forward that actually navigate between tracks, with a live track counter.
-- **Tracklist wizard** — each date detail is a track (The When, The Vibe, The Scene, The Cheers, The Sweet Spot), with tape-progress bar and track dots.
-- **J-card wrap-up** — the whole plan is presented as the cassette's J-card insert before you press RECORD.
-- **PRESS RECORD finale** — live recording counter with heartbeat pulse, confetti, and a downloadable `{Girlfriend}_{Boyfriend}_Mixtape_Cover_{date}.png` cover art keepsake.
-- **Liner notes** — the secret love letter opens as the tape's liner notes.
-
-## Structure (same pattern in all variants)
+## Project structure (same in every version)
 
 ```
 src/
 ├── config/appConfig.ts        ← the only file you need to edit
-├── components/                ← screens, quests/chapters, modals, backgrounds
-├── utils/emailService.ts      ← FormSubmit email dispatch
-├── types.ts                   ← DateSelection & stage types
-└── App.tsx                    ← state machine + header/footer + settings modal
+├── components/                ← screens and UI parts
+├── utils/emailService.ts      ← sends the email
+├── types.ts                   ← types
+└── App.tsx                    ← main app logic
 ```
 
 ## Deployment
 
-`npm run build` produces a static site in `dist/` — deploy to Vercel, Netlify, GitHub Pages, or any static host.
+`npm run build` creates a static site in `dist/`. Host it anywhere: Vercel, Netlify, GitHub Pages, etc.
