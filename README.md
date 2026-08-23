@@ -51,15 +51,23 @@ npm run preview      # preview the build
 
 ## Customize — edit one file
 
-Everything you can change lives in `src/config/appConfig.ts`:
+Every version gets its text from one single file: `src/config/appConfig.ts`. No coding knowledge needed.
 
-- **Names** — yours and hers, used in titles, letters, and downloaded files
-- **Dates** — the 7 days she can pick from, plus free-text date ranges
+How to make it yours:
+
+1. Open the version's folder → `src/config/` → open `appConfig.ts` with any text editor (Notepad works).
+2. Change only the words between `"quotes"`.
+3. Save, run `npm run dev`, and watch your changes live.
+
+What you can change:
+
+- **Names** — yours and hers (appears in titles, letters, downloaded files)
+- **Dates** — the 7 days she can choose from
 - **Choices** — time slots, activities, places, drinks, greetings
-- **Text** — jokes for the "NO" button, the secret love letter, cover text
-- **Your email** — `prefillEmail` shows in the ⚙️ settings modal the first time
+- **Texts** — the "NO" button jokes, the secret love letter, cover text
+- **Your email** — where the confirmed plan gets sent
 
-TypeScript checks every field, so if you rename something wrong, the build tells you.
+If you break something by accident, don't panic — the build will fail and tell you exactly which line to fix.
 
 ## The Email Feature ⚙️
 
@@ -79,23 +87,6 @@ The watercolor version can play a personal voice message:
 1. Save your recording as `watercolor/public/audio/voice-note.mp3`.
 2. That's it — the record player appears by itself.
 3. To hide it, open `watercolor/src/config/appConfig.ts` and set `voiceNote.src` to `''`.
-
-## Windows 95 Extras 🖥️
-
-- **Boot splash** — LoveOS 95 startup before the desktop.
-- **Draggable windows** — move them around; closing is denied ("date setup in progress").
-- **BSOD joke** — click "NO ❌" 5 times: blue screen, then the NO button disappears forever.
-- **Desktop icons** — Date Wizard 💘, README.TXT 📄, Recycle Bin 🗑️, My Computer 🖥️.
-- **Taskbar** — live clock and a pulsing START button.
-- **License ticket** — a downloadable `{Girlfriend}_{Boyfriend}_Windows_License_{date}.png`.
-
-## Date Mixtape Extras 📼
-
-- **Cassette deck** — spinning reels with play / pause / rewind / fast-forward that really change tracks.
-- **Tracklist wizard** — each date choice is a track (The When, The Vibe, The Scene...).
-- **J-card wrap-up** — the plan shows up as the cassette's insert card.
-- **PRESS RECORD finale** — recording counter, confetti, and a downloadable mixtape cover image.
-- **Liner notes** — the love letter opens as the tape's liner notes.
 
 ## Roadmap 🚧
 
