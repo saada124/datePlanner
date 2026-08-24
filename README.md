@@ -6,37 +6,44 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 
 ## Versions
 
-| Version | Folder | What it looks like |
-|---|---|---|
-| Retro RPG | `retro style/` | An 8-bit quest with items, XP... |
-| Midnight | `midnight style/` | Stars and night sky theme and a downloadable VIP pass |
-| Storybook | `storybook style/` | An old paper storybook with chapters and invitation card included |
-| Watercolor | `watercolor/` | Soft pastel colors and calm text. Plays your voice note like a record player |
-| Windows 95 | `win95 style/` | A fake "date-setup.exe" installer: boot screen, windows you can drag and multiple easter eggs |
-| Date Mixtape | `mixtape/` | A cassette tape: spinning reels, play / rewind / fast-forward buttons and a tracklist for the date (unstable) |
-| Island Getaway | `island style/` | Animal Crossing style flight trip and a downloadable Boarding Pass |
-| Café & Bistro | `cafe style/` | A French café menu: pick items like ordering food, get a printed receipt at the end |
+| Version        | Folder             | What it looks like                                                                                  |
+| -------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| Date Menu      | `menu style/`      | A restaurant menu tasting adventure: 4 courses, scratch card, roulette, jukebox, live bill & ticket |
+| Retro RPG      | `retro style/`     | An 8-bit quest with items, XP...                                                                    |
+| Midnight       | `midnight style/`  | Stars and night sky theme and a downloadable VIP pass                                               |
+| Storybook      | `storybook style/` | An old paper storybook with chapters and invitation card included                                   |
+| Watercolor     | `watercolor/`      | Soft pastel colors and calm text. Plays your voice note like a record player                        |
+| Windows 95     | `win95 style/`     | A fake "date-setup.exe" installer: boot screen, windows you can drag and multiple easter eggs       |
+| Date Mixtape   | `mixtape/`         | A cassette tape: spinning reels, play / rewind / fast-forward buttons and a tracklist for the date  |
+| Island Getaway | `island style/`    | Animal Crossing style flight trip and a downloadable Boarding Pass                                  |
+| Café & Bistro  | `cafe style/`      | A French café menu: pick items like ordering food, get a printed receipt at the end                 |
 
-**Please note:** **Midnight**, **RetroRPG**, **Win95**  are the only stable versions right now. The Café and Mixtape versions were purely vibe-coded and still need some changes and fixes — expect a few rough spots.
+**Please note:** **Date Menu**, **Midnight**, **RetroRPG**, **Win95**, and **Watercolor** are fully stable with verified builds and WhatsApp sharing support.
 
 ## Screenshots 📸
 
 ### 🎮 Retro RPG
+
 ![Retro RPG](docs/screenshots/retro.png)
 
 ### 🌌 Midnight
+
 ![Midnight](docs/screenshots/midnight.png)
 
 ### 🎨 Watercolor
+
 ![Watercolor](docs/screenshots/watercolor.png)
 
 ### 🖥️ Windows 95
+
 ![Windows 95](docs/screenshots/win95.png)
 
 ### 🏝️ Island Getaway
+
 ![Island Getaway](docs/screenshots/island.png)
 
 ### ☕ Café & Bistro
+
 ![Café & Bistro](docs/screenshots/cafe.png)
 
 ## Quick Start (Super simple)
@@ -48,7 +55,6 @@ npm run dev          # start the local server
 npm run build        # production build → dist/
 npm run preview      # preview the build
 ```
-
 
 ## Customize — edit one file
 
@@ -87,14 +93,60 @@ When she confirms the date, the plan is emailed through [FormSubmit](https://for
 
   **Please note:** These steps/options won't be needed if you set up the config file `appConfig.ts` correctly and filled in the email column.
 
+## Adding Photos 📸 (Date Menu Style)
+
+The **Date Menu (`menu style/`)** version includes a 3D flippable vintage Polaroid pinned to the table:
+
+### 1. Using Local Photos (Recommended)
+
+1. Save your photos inside the `menu style/public/` folder (e.g. `menu style/public/couple1.jpg`, `menu style/public/couple2.jpg`).
+2. Open `menu style/src/config/appConfig.ts` and set:
+
+```typescript
+polaroid: {
+  imageUrl: "/couple1.jpg",
+  caption: "Our Favorite Laughs · Table N° 07",
+  noteOnBack: "Can't wait for our date! ❤️\n— Alex",
+  dateBadge: "Memory No. 07",
+  // (Optional) Multiple photos to flip through:
+  photos: [
+    { url: "/couple1.jpg", caption: "Our Favorite Laughs" },
+    { url: "/couple2.jpg", caption: "Sunset strolls with you ✨" }
+  ]
+}
+```
+
+### 2. Using Web Image Links
+
+You can also paste any direct image URL (from Imgur, Cloudinary, Google Photos, etc.):
+
+```typescript
+polaroid: {
+  imageUrl: "https://your-image-host.com/photo.jpg",
+  caption: "Our First Trip Together ✈️"
+}
+```
+
+- **Flipping the Photo**: Clicking the Polaroid on the landing page flips it over in 3D to reveal your handwritten note on the back!
+- **Multiple Photos**: If multiple photos are specified in `photos: [...]`, a `Next Photo ❯` button automatically appears.
+
+## Background Music & Table Jukebox 🎵 (Date Menu Style)
+
+The **Date Menu (`menu style/`)** version includes an interactive Vintage Vinyl Jukebox with real streaming café jazz, lofi, and piano tracks:
+
+### Adding Your Own Couple Song:
+
+1. Save your MP3 file as:
+   👉 `menu style/public/audio/couple-song.mp3`
+2. Open `menu style/src/config/appConfig.ts` and set your title & volume under the `audio` section.
+3. Your song will automatically be selectable in the Table Jukebox turntable popup!
+
 ## Voice Note 🎙️ (watercolor)
 
 The watercolor version can play a personal voice message:
 
-> ⚠️ This feature is still under construction and may not work perfectly yet.
-
 1. Save your recording as `watercolor/public/audio/voice-note.mp3`.
-2. That's it — the record player appears by itself.
+2. That's it — the record player appears with equalizer bars and acoustic synth fallback.
 3. To hide it, open `watercolor/src/config/appConfig.ts` and set `voiceNote.src` to `''`.
 
 ## Roadmap 🚧
@@ -112,4 +164,3 @@ src/
 ├── types.ts                   ← types
 └── App.tsx                    ← main app logic
 ```
-

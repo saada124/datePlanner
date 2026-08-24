@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --bg-page: #FFF8EC;
+  --bg-dot: #D8B29A;
+  --bg-card: #FFFCF5;
+  --bg-chip: #FFF8EC;
+  --bg-chip-hover: #FDF2E7;
+  --bg-inner-box: #FFF8EC;
+  --bg-highlight: #FDF2E7;
+  --text-primary: #2B1B17;
+  --text-secondary: #70584E;
+  --text-muted: #9C8276;
+  --border-card: rgba(216, 178, 154, 0.55);
+  --border-subtle: rgba(216, 178, 154, 0.35);
+  --border-dashed: rgba(216, 178, 154, 0.65);
+  --card-shadow: 0 12px 36px -12px rgba(43, 27, 23, 0.08), 0 1px 3px rgba(43, 27, 23, 0.04);
+}
+
+.candlelit {
+  color-scheme: dark;
+  --bg-page: #160D0B;
+  --bg-dot: #48271C;
+  --bg-card: #231612;
+  --bg-chip: #2C1B16;
+  --bg-chip-hover: #3B241D;
+  --bg-inner-box: #1C110E;
+  --bg-highlight: #35201A;
+  --text-primary: #FFF5EA;
+  --text-secondary: #E8C4AF;
+  --text-muted: #B8907E;
+  --border-card: rgba(244, 164, 92, 0.35);
+  --border-subtle: rgba(244, 164, 92, 0.2);
+  --border-dashed: rgba(244, 164, 92, 0.45);
+  --card-shadow: 0 16px 45px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(244, 164, 92, 0.08);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Nunito', 'DM Sans', system-ui, sans-serif;
+  background-image: radial-gradient(var(--bg-dot) 0.75px, transparent 0.75px), radial-gradient(var(--bg-dot) 0.75px, var(--bg-page) 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Tactile Linen Paper Card Texture */
+.paper-menu-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--card-shadow);
+  color: var(--text-primary);
+  position: relative;
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+}
+
+.paper-menu-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+}
+
+/* Hanging Satin Ribbon Bookmark */
+.satin-ribbon {
+  background: linear-gradient(180deg, #E8635A 0%, #D45048 100%);
+  box-shadow: 2px 4px 10px rgba(232, 99, 90, 0.35);
+  position: relative;
+}
+
+.satin-ribbon-tail {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #D45048;
+  border-right: 8px solid #D45048;
+  border-bottom: 10px solid transparent;
+}
+
+/* Perforated Coupon / Ticket Stub Separation */
+.perforated-cutout {
+  position: relative;
+  background-image: radial-gradient(circle at 0 50%, transparent 10px, var(--bg-card) 11px),
+                    radial-gradient(circle at 100% 50%, transparent 10px, var(--bg-card) 11px);
+}
+
+.perforated-dash-line {
+  background-image: linear-gradient(to right, var(--border-dashed) 50%, rgba(255,255,255,0) 0%);
+  background-position: top;
+  background-size: 10px 1.5px;
+  background-repeat: repeat-x;
+}
+
+/* Self-drawing SVG Stroke Animation */
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: drawCheck 0.25s ease-out forwards;
+}
+
+/* Rubber Ink Stamp Texture */
+.rubber-stamp {
+  border: 3.5px dashed #4A7A6D;
+  color: #4A7A6D;
+  background: rgba(235, 243, 241, 0.85);
+  transform: rotate(-3deg);
+  mask-image: radial-gradient(circle at 50% 50%, black 85%, rgba(0,0,0,0.8) 100%);
+}
+
+.candlelit .rubber-stamp {
+  background: rgba(36, 56, 50, 0.9);
+  border-color: #62A896;
+  color: #79C7B3;
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-dot);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E8635A;
+}

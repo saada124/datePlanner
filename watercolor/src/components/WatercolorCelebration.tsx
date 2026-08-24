@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { DateSelection } from '../types';
 import { APP_CONFIG } from '../config/appConfig';
-import { WatercolorVoiceNote } from './WatercolorVoiceNote';
 import { WatercolorLetter } from './WatercolorLetter';
 import { sound } from '../utils/soundEffects';
 
@@ -289,8 +288,6 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
           <span>Your painted date plan was sealed & emailed! ✨</span>
         </div>
       </motion.div>
-
-      <WatercolorVoiceNote />
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 mb-6">
