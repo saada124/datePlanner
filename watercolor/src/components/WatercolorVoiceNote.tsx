@@ -1,21 +1,44 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { APP_CONFIG } from '../config/appConfig';
+import { sound } from '../utils/soundEffects';
 
 export const WatercolorVoiceNote: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [hasError, setHasError] = useState<boolean>(false);
+  const [usingFallbackSynth, setUsingFallbackSynth] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   if (!APP_CONFIG.voiceNote.src) return null;
 
   const toggle = () => {
+    sound.unlock();
     const audio = audioRef.current;
-    if (!audio) return;
+
     if (isPlaying) {
-      audio.pause();
+      if (audio && !usingFallbackSynth) {
+        audio.pause();
+      } else {
+        sound.stopAcousticMelody();
+      }
+      setIsPlaying(false);
+      setUsingFallbackSynth(false);
+      return;
+    }
+
+    if (audio) {
+      audio.play().then(() => {
+        setIsPlaying(true);
+        setUsingFallbackSynth(false);
+      }).catch(() => {
+        // Graceful fallback to melodic acoustic synth
+        setUsingFallbackSynth(true);
+        setIsPlaying(true);
+        sound.playAcousticMelody();
+      });
     } else {
-      audio.play().catch(() => setHasError(true));
+      setUsingFallbackSynth(true);
+      setIsPlaying(true);
+      sound.playAcousticMelody();
     }
   };
 
@@ -24,7 +47,7 @@ export const WatercolorVoiceNote: React.FC = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="paper-card rounded-3xl p-4 sm:p-5 mb-6 flex items-center gap-4 max-w-md mx-auto text-left"
+      className="paper-card rounded-3xl p-4 sm:p-5 mb-6 flex items-center gap-4 max-w-md mx-auto text-left relative overflow-hidden"
     >
       <audio
         ref={audioRef}
@@ -32,14 +55,19 @@ export const WatercolorVoiceNote: React.FC = () => {
         preload="metadata"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-        onError={() => setHasError(true)}
+        onEnded={() => {
+          setIsPlaying(false);
+          setUsingFallbackSynth(false);
+        }}
+        onError={() => {
+          // Prepared for fallback
+        }}
       />
 
       {/* Spinning watercolor record */}
       <div className="relative shrink-0">
         <div
-          className={`w-16 h-16 rounded-full bg-[conic-gradient(from_0deg,#e8a0b4,#c9b8e8,#9fc3b8,#e7c782,#e8a0b4)] shadow-lg flex items-center justify-center ${
+          className={`w-16 h-16 rounded-full bg-[conic-gradient(from_0deg,#e8a0b4,#c9b8e8,#9fc3b8,#e7c782,#e8a0b4)] shadow-lg flex items-center justify-center transition-transform ${
             isPlaying ? 'animate-disc-spin' : ''
           }`}
         >
@@ -53,23 +81,32 @@ export const WatercolorVoiceNote: React.FC = () => {
       </div>
 
       <div className="min-w-0 flex-1">
-        <h4 className="font-serif-title text-sm font-bold text-storybook-ink">
-          {APP_CONFIG.voiceNote.title}
-        </h4>
+        <div className="flex items-center gap-2">
+          <h4 className="font-serif-title text-sm font-bold text-storybook-ink truncate">
+            {APP_CONFIG.voiceNote.title}
+          </h4>
+          {isPlaying && (
+            <div className="flex items-end gap-0.5 h-3">
+              <span className="w-0.5 h-3 bg-storybook-roseDark animate-pulse rounded-full" />
+              <span className="w-0.5 h-2 bg-storybook-rose animate-pulse delay-100 rounded-full" />
+              <span className="w-0.5 h-3.5 bg-storybook-gold animate-pulse delay-200 rounded-full" />
+              <span className="w-0.5 h-1.5 bg-storybook-sage animate-pulse delay-300 rounded-full" />
+            </div>
+          )}
+        </div>
         <p className="font-handwriting text-base text-storybook-inkLight leading-snug">
-          {APP_CONFIG.voiceNote.subtitle}
+          {isPlaying
+            ? usingFallbackSynth
+              ? 'Playing ambient love melody... 🌸'
+              : 'Playing recorded message... 🎙️'
+            : APP_CONFIG.voiceNote.subtitle}
         </p>
-        {hasError && (
-          <p className="text-[10px] font-sans text-storybook-roseDark mt-1">
-            Voice note not found — add an mp3 at public/audio/voice-note.mp3
-          </p>
-        )}
       </div>
 
       <button
         type="button"
         onClick={toggle}
-        aria-label={isPlaying ? 'Pause voice note' : 'Play voice note'}
+        aria-label={isPlaying ? 'Pause message' : 'Play message'}
         className="story-btn-primary w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-lg cursor-pointer"
       >
         <span>{isPlaying ? '⏸' : '▶'}</span>

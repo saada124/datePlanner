@@ -62,21 +62,22 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
       dirY = (dy / len) + (Math.random() - 0.5) * 1.2;
     }
 
-    const jumpDist = 180 + Math.random() * 160;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const jumpDist = (isMobile ? 70 : 160) + Math.random() * (isMobile ? 50 : 120);
     const proposedX = offset.x + dirX * jumpDist;
     const proposedY = offset.y + dirY * jumpDist;
 
-    const maxBoundX = Math.min(window.innerWidth * 0.4, 280);
-    const maxBoundY = Math.min(window.innerHeight * 0.35, 220);
+    const maxBoundX = isMobile ? Math.min(window.innerWidth * 0.25, 85) : Math.min(window.innerWidth * 0.4, 250);
+    const maxBoundY = isMobile ? Math.min(window.innerHeight * 0.2, 110) : Math.min(window.innerHeight * 0.35, 200);
 
     let finalX = proposedX;
     let finalY = proposedY;
 
     if (Math.abs(finalX) > maxBoundX) {
-      finalX = finalX > 0 ? -maxBoundX * (0.5 + Math.random() * 0.4) : maxBoundX * (0.5 + Math.random() * 0.4);
+      finalX = finalX > 0 ? -maxBoundX * (0.4 + Math.random() * 0.4) : maxBoundX * (0.4 + Math.random() * 0.4);
     }
     if (Math.abs(finalY) > maxBoundY) {
-      finalY = finalY > 0 ? -maxBoundY * (0.5 + Math.random() * 0.4) : maxBoundY * (0.5 + Math.random() * 0.4);
+      finalY = finalY > 0 ? -maxBoundY * (0.4 + Math.random() * 0.4) : maxBoundY * (0.4 + Math.random() * 0.4);
     }
 
     setOffset({ x: finalX, y: finalY });

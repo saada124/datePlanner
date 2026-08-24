@@ -178,6 +178,61 @@ class StorySoundSynth {
       // Audio not ready
     }
   }
+  private melodyInterval: number | null = null;
+
+  public unlock() {
+    this.initCtx();
+  }
+
+  public isReady(): boolean {
+    return !!this.ctx && this.ctx.state === 'running';
+  }
+
+  // Play soothing acoustic watercolor music loop
+  public playAcousticMelody() {
+    if (this.isMuted) return;
+    this.stopAcousticMelody();
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      const scale = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // Pentatonic warmth
+      let step = 0;
+
+      const playNote = () => {
+        if (!this.ctx || this.isMuted) return;
+        const now = this.ctx.currentTime;
+        const freq = scale[step % scale.length];
+        step = (step + 1) % scale.length;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.06, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.25);
+      };
+
+      playNote();
+      this.melodyInterval = window.setInterval(playNote, 600);
+    } catch {
+      // Audio not ready
+    }
+  }
+
+  public stopAcousticMelody() {
+    if (this.melodyInterval !== null) {
+      clearInterval(this.melodyInterval);
+      this.melodyInterval = null;
+    }
+  }
 }
 
 export const sound = new StorySoundSynth();

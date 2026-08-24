@@ -293,29 +293,47 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
       <WatercolorVoiceNote />
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        <motion.button
-          whileHover={{ scale: 1.04, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={handleDownloadKeepsake}
-          className="story-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+      <div className="flex flex-col gap-3 mb-6">
+        {/* WhatsApp Share Button */}
+        <motion.a
+          whileHover={{ scale: 1.02, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+            `Dearest ${APP_CONFIG.boyfriendName}! 🎨 Our watercolor date is officially painted!\n\n📅 Date & Time: ${selection.dayDate} (${selection.customTime || selection.timeSlot})\n📍 Secret Spot: ${selection.customLocation || selection.location || 'Our Spot'}\n🎨 Adventures: ${selection.activities.join(', ')}${selection.customActivity ? ` + ${selection.customActivity}` : ''}\n🧋 Elixir: ${selection.customDrink || selection.drink}\n\nCan't wait to paint this day with you! 💖✨`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => sound.playChime()}
+          className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-semibold text-xs sm:text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
-          <span>🎟️</span>
-          <span>{cardDownloaded ? 'Keepsake Saved! ✓' : 'Save Keepsake Card'}</span>
-        </motion.button>
+          <span>💬</span>
+          <span>Send Date Summary on WhatsApp</span>
+        </motion.a>
 
-        <motion.button
-          whileHover={{ scale: 1.04, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => {
-            sound.playChime();
-            setShowLetter(true);
-          }}
-          className="story-btn-secondary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-storybook-rose"
-        >
-          <span>💌</span>
-          <span>Open Secret Letter ✉️</span>
-        </motion.button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={handleDownloadKeepsake}
+            className="story-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+          >
+            <span>🎟️</span>
+            <span>{cardDownloaded ? 'Keepsake Saved! ✓' : 'Save Keepsake Card'}</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => {
+              sound.playChime();
+              setShowLetter(true);
+            }}
+            className="story-btn-secondary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-storybook-rose"
+          >
+            <span>💌</span>
+            <span>Open Secret Letter ✉️</span>
+          </motion.button>
+        </div>
       </div>
 
       {/* Reset Link */}

@@ -262,29 +262,47 @@ export const MixtapeCelebration: React.FC<MixtapeCelebrationProps> = ({
       </motion.div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        <motion.button
-          whileHover={{ scale: 1.04, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={handleDownloadKeepsake}
-          className="mix-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+      <div className="flex flex-col gap-3 mb-6">
+        {/* WhatsApp Share */}
+        <motion.a
+          whileHover={{ scale: 1.02, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+            `Hey ${APP_CONFIG.boyfriendName}! 🎧 The Date Mixtape is recorded!\n\n📅 Track 1 · When: ${selection.dayDate} (${selection.customTime || selection.timeSlot})\n📍 Track 2 · Where: ${selection.customLocation || selection.location || 'Our Spot'}\n🎸 Track 3 · Vibe: ${selection.activities.join(', ')}${selection.customActivity ? ` + ${selection.customActivity}` : ''}\n☕ Track 4 · Sips: ${selection.customDrink || selection.drink}\n\nLet's press play! 🎶✨`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => sound.playChime()}
+          className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-semibold text-xs sm:text-sm rounded-full shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
-          <span>💿</span>
-          <span>{cardDownloaded ? 'Cover Saved! ✓' : 'Save Mixtape Cover'}</span>
-        </motion.button>
+          <span>💬</span>
+          <span>Send Mixtape Summary on WhatsApp</span>
+        </motion.a>
 
-        <motion.button
-          whileHover={{ scale: 1.04, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => {
-            sound.playChime();
-            setShowLetter(true);
-          }}
-          className="mix-btn-secondary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-        >
-          <span>💌</span>
-          <span>Open Liner Notes ✉️</span>
-        </motion.button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={handleDownloadKeepsake}
+            className="mix-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+          >
+            <span>💿</span>
+            <span>{cardDownloaded ? 'Cover Saved! ✓' : 'Save Mixtape Cover'}</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => {
+              sound.playChime();
+              setShowLetter(true);
+            }}
+            className="mix-btn-secondary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+          >
+            <span>💌</span>
+            <span>Open Liner Notes ✉️</span>
+          </motion.button>
+        </div>
       </div>
 
       {/* Reset Link */}
