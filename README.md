@@ -8,16 +8,16 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 
 | Version | Folder | What it looks like |
 |---|---|---|
-| Retro RPG | `retro style/` | An 8-bit quest with items, XP, an "EYYYYYY" button and inside jokes |
-| Midnight | `midnight style/` | Stars and night sky theme. Comes with a pre-filled plan and a downloadable VIP pass |
-| Storybook | `storybook style/` | An old paper storybook with chapters and a wax seal letter. Invitation card included |
+| Retro RPG | `retro style/` | An 8-bit quest with items, XP... |
+| Midnight | `midnight style/` | Stars and night sky theme and a downloadable VIP pass |
+| Storybook | `storybook style/` | An old paper storybook with chapters and invitation card included |
 | Watercolor | `watercolor/` | Soft pastel colors and calm text. Plays your voice note like a record player |
-| Windows 95 | `win95 style/` | A fake "date-setup.exe" installer: boot screen, windows you can drag, a BSOD joke, and a license ticket |
-| Date Mixtape | `mixtape/` | A cassette tape: spinning reels, play / rewind / fast-forward buttons, and a tracklist for the date |
-| Island Getaway | `island style/` | Animal Crossing style flight trip: dialogues, pocket inventory, drinks, and a downloadable Boarding Pass |
+| Windows 95 | `win95 style/` | A fake "date-setup.exe" installer: boot screen, windows you can drag and multiple easter eggs |
+| Date Mixtape | `mixtape/` | A cassette tape: spinning reels, play / rewind / fast-forward buttons and a tracklist for the date (unstable) |
+| Island Getaway | `island style/` | Animal Crossing style flight trip and a downloadable Boarding Pass |
 | Café & Bistro | `cafe style/` | A French café menu: pick items like ordering food, get a printed receipt at the end |
 
-**Please note:** **Midnight** is the only stable version right now. The Café and Mixtape versions were purely vibe-coded and still need some changes and fixes — expect a few rough spots.
+**Please note:** **Midnight**, **RetroRPG**, **Win95**  are the only stable versions right now. The Café and Mixtape versions were purely vibe-coded and still need some changes and fixes — expect a few rough spots.
 
 ## Screenshots 📸
 
@@ -39,7 +39,7 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 ### ☕ Café & Bistro
 ![Café & Bistro](docs/screenshots/cafe.png)
 
-## Quick Start
+## Quick Start (Super simple)
 
 ```bash
 cd "retro style"      # or "midnight style" / "storybook style" / "watercolor" / "win95 style" / "mixtape" / "island style" / "cafe style"
@@ -48,6 +48,7 @@ npm run dev          # start the local server
 npm run build        # production build → dist/
 npm run preview      # preview the build
 ```
+
 
 ## Customize — edit one file
 
@@ -69,6 +70,12 @@ What you can change:
 
 If you break something by accident, don't panic — the build will fail and tell you exactly which line to fix.
 
+## Deployment
+
+Right now I highly suggest using **[Netlify](https://www.netlify.com)** — simple and quick.
+
+`npm run build` creates a static site in `dist/`, so any static host works too (Vercel, GitHub Pages, etc.).
+
 ## The Email Feature ⚙️
 
 When she confirms the date, the plan is emailed through [FormSubmit](https://formsubmit.co):
@@ -77,6 +84,8 @@ When she confirms the date, the plan is emailed through [FormSubmit](https://for
 - If no email is set, the settings window opens by itself before confirming.
 - **First time only:** FormSubmit sends you a one-time activation link. Click it once and future emails arrive normally.
 - The sending code is in `src/utils/emailService.ts`.
+
+  **Please note:** These steps/options won't be needed if you set up the config file `appConfig.ts` correctly and filled in the email column.
 
 ## Voice Note 🎙️ (watercolor)
 
@@ -104,8 +113,3 @@ src/
 └── App.tsx                    ← main app logic
 ```
 
-## Deployment
-
-Right now I highly suggest using **[Netlify](https://www.netlify.com)** — simple and quick.
-
-`npm run build` creates a static site in `dist/`, so any static host works too (Vercel, GitHub Pages, etc.).
