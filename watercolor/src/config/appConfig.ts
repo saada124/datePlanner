@@ -164,5 +164,19 @@ export const APP_CONFIG = {
     body: 'Some days are sketches, and some days are masterpieces. Every moment with you is a watercolor bloom — soft, bright, and impossible to forget. I cannot wait to paint our next memory together: your smile, your laugh, your hand in mine. Thank you for being the most beautiful color in my world.',
     signOff: 'With all my love,',
     author: `${NAMES.boyfriendName} ❤️`
-  }
+  },
+
+  // 10 Editable Reactions / Critiques for the Drawing Studio Mini-Game
+  paintingReactions: [
+    `🎨 100/10: The Louvre just called. Mona Lisa has officially been demoted for ${NAMES.girlfriendName}'s painting!`,
+    `🌸 1000/10: Pure watercolor poetry. Destiny and love painted this together! ✨`,
+    `👑 Infinity/10: Certified masterwork by Queen ${NAMES.girlfriendName} & ${NAMES.boyfriendName}! 👑`,
+    `🍷 10/10: Monet and Van Gogh have been suspiciously quiet since you painted this.`,
+    `💖 999/10: Warning: Extreme levels of cuteness and chemistry detected in this canvas!`,
+    `🥐 10/10: Worth trading all the croissants in Paris for this single painting.`,
+    `✨ 100/10: Picasso could never capture this much romantic magic.`,
+    `🍰 10/10: Even sweeter than our favorite dessert after dinner. 🥠😏`,
+    `🌹 1000/10: A masterpiece worthy of its own romantic museum exhibition.`,
+    `🏆 100/10: Approved unconditionally by ${NAMES.boyfriendName} with maximum boyfriend pride! ❤️`
+  ]
 };

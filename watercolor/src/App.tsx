@@ -38,6 +38,12 @@ export function App() {
   const [chapter, setChapter] = useState<StoryChapter>('PROLOGUE');
   const [selection, setSelection] = useState<DateSelection>(INITIAL_SELECTION);
   const [email, setEmail] = useState<string>(() => localStorage.getItem('dateAppEmail') || '');
+  const [customPainting, setCustomPainting] = useState<string | null>(
+    () => localStorage.getItem('dateAppCustomPainting') || null
+  );
+  const [cardSnapshotUrl, setCardSnapshotUrl] = useState<string | null>(
+    () => localStorage.getItem('dateAppCardSnapshot') || null
+  );
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [studioOpen, setStudioOpen] = useState<boolean>(false);
   const [pendingConfirm, setPendingConfirm] = useState<boolean>(false);
@@ -52,6 +58,8 @@ export function App() {
   const handleReset = () => {
     setSelection(INITIAL_SELECTION);
     setChapter('PROLOGUE');
+    setCardSnapshotUrl(null);
+    localStorage.removeItem('dateAppCardSnapshot');
   };
 
   const proceedToEpilogue = (targetEmail: string) => {
@@ -61,7 +69,11 @@ export function App() {
     setChapter('EPILOGUE');
   };
 
-  const handleFinalConfirm = () => {
+  const handleFinalConfirm = (snapshotUrl?: string) => {
+    if (snapshotUrl) {
+      setCardSnapshotUrl(snapshotUrl);
+      localStorage.setItem('dateAppCardSnapshot', snapshotUrl);
+    }
     if (!isValidEmail(email)) {
       setPendingConfirm(true);
       setSettingsOpen(true);
@@ -292,7 +304,9 @@ export function App() {
               >
                 <WatercolorFinalCard
                   selection={selection}
-                  onConfirm={handleFinalConfirm}
+                  customPainting={customPainting}
+                  onOpenStudio={() => setStudioOpen(true)}
+                  onConfirm={(snapshotUrl) => handleFinalConfirm(snapshotUrl)}
                   onEdit={() => setChapter('CHAPTER_1_DATE')}
                 />
               </motion.div>
@@ -309,6 +323,7 @@ export function App() {
               >
                 <WatercolorCelebration
                   selection={selection}
+                  cardSnapshotUrl={cardSnapshotUrl}
                   onReset={handleReset}
                 />
               </motion.div>
@@ -332,6 +347,11 @@ export function App() {
       <WatercolorStudioMiniGame
         isOpen={studioOpen}
         onClose={() => setStudioOpen(false)}
+        onIncludeInCard={(dataUrl) => {
+          setCustomPainting(dataUrl);
+          localStorage.setItem('dateAppCustomPainting', dataUrl);
+          setStudioOpen(false);
+        }}
       />
 
       {/* Email Settings Modal */}

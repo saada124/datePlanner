@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toPng } from 'html-to-image';
 import { watercolorAudio } from '../utils/watercolorAudio';
 import { DateSelection } from '../types';
 import { APP_CONFIG } from '../config/appConfig';
+import { getDiscoveredRecipeIds, ALCHEMIST_RECIPES } from '../config/alchemistRecipes';
 
 export interface PlacedSticker {
   id: string;
@@ -15,6 +17,7 @@ export interface PlacedSticker {
 }
 
 const STICKER_CATALOG = [
+  { id: 'crown', emoji: '👑', label: 'Crown' },
   { id: 'paint', emoji: '🎨', label: 'Palette' },
   { id: 'blossom', emoji: '🌸', label: 'Blossom' },
   { id: 'butterfly', emoji: '🦋', label: 'Butterfly' },
@@ -23,22 +26,34 @@ const STICKER_CATALOG = [
   { id: 'tulip', emoji: '🌷', label: 'Tulip' },
   { id: 'coffee', emoji: '☕', label: 'Café' },
   { id: 'ribbon', emoji: '🎀', label: 'Ribbon' },
-  { id: 'strawberry', emoji: '🍓', label: 'Berry' },
   { id: 'heart-seal', emoji: '💖', label: 'Love' },
 ];
 
-interface WatercolorStickerEaselProps {
-  selection: DateSelection;
+export interface WatercolorStickerEaselHandle {
+  captureCard: () => Promise<string | null>;
 }
 
-export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ selection }) => {
+interface WatercolorStickerEaselProps {
+  selection: DateSelection;
+  customPainting?: string | null;
+  onOpenStudio?: () => void;
+}
+
+export const WatercolorStickerEasel = forwardRef<
+  WatercolorStickerEaselHandle,
+  WatercolorStickerEaselProps
+>(({ selection, customPainting, onOpenStudio }, ref) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([
-    { id: 'stk-init-1', emoji: '🌸', label: 'Blossom', x: 86, y: 14, rotation: 12, scale: 1.2 },
-    { id: 'stk-init-2', emoji: '✨', label: 'Sparkles', x: 12, y: 82, rotation: -8, scale: 1.1 }
+    { id: 'stk-init-1', emoji: '🌸', label: 'Blossom', x: 88, y: 16, rotation: 12, scale: 1.2 },
+    { id: 'stk-init-2', emoji: '✨', label: 'Sparkles', x: 14, y: 84, rotation: -8, scale: 1.1 }
   ]);
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
-  const boardRef = useRef<HTMLDivElement | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const boardRef = useRef<HTMLDivElement | null>(null);
+
+  const discoveredIds = getDiscoveredRecipeIds();
+  const unlockedRecipes = ALCHEMIST_RECIPES.filter((r) => discoveredIds.includes(r.id));
+  const isMasterAlchemist = discoveredIds.includes('grand_masterpiece') || discoveredIds.length >= 5;
 
   const handleAddSticker = (item: typeof STICKER_CATALOG[0]) => {
     watercolorAudio.playSplatterPop();
@@ -47,18 +62,18 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
       emoji: item.emoji,
       label: item.label,
       x: 35 + Math.random() * 30,
-      y: 35 + Math.random() * 30,
+      y: 40 + Math.random() * 30,
       rotation: (Math.random() - 0.5) * 30,
       scale: 1 + Math.random() * 0.3
     };
-    setStickers(prev => [...prev, newSticker]);
+    setStickers((prev) => [...prev, newSticker]);
     setSelectedStickerId(newSticker.id);
   };
 
   const handleRemoveSticker = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     watercolorAudio.playBrushStroke(0.6);
-    setStickers(prev => prev.filter(s => s.id !== id));
+    setStickers((prev) => prev.filter((s) => s.id !== id));
     if (selectedStickerId === id) setSelectedStickerId(null);
   };
 
@@ -68,117 +83,39 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
     setSelectedStickerId(null);
   };
 
-  const handleExportPostcard = () => {
+  // High-resolution capture function that enables the Barcode strip only in the exported image
+  const captureCardSnapshot = async (): Promise<string | null> => {
+    if (!boardRef.current) return null;
     setIsExporting(true);
-    watercolorAudio.playFanfare();
+    setSelectedStickerId(null);
 
-    // Canvas drawing for crisp PNG postcard export
-    const canvas = document.createElement('canvas');
-    const width = 1200;
-    const height = 800;
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
+    // Pause briefly to let React flush state and render the Barcode in the DOM
+    await new Promise((resolve) => setTimeout(resolve, 120));
 
-    if (!ctx) {
-      setIsExporting(false);
-      return;
-    }
-
-    // Background watercolor gradient
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, '#fbfcfe');
-    bgGrad.addColorStop(0.5, '#fef0f4');
-    bgGrad.addColorStop(1, '#eef6fc');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
-
-    // Decorative painted border
-    ctx.strokeStyle = '#c96f8a';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(30, 30, width - 60, height - 60);
-
-    ctx.strokeStyle = '#9fc3b8';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(40, 40, width - 80, height - 80);
-
-    // Header Title
-    ctx.fillStyle = '#3b4a63';
-    ctx.font = 'bold 44px "Playfair Display", Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎨 Our Painted Date Invitation 🌸', width / 2, 110);
-
-    ctx.fillStyle = '#c96f8a';
-    ctx.font = 'italic 26px "Caveat", cursive';
-    ctx.fillText(`A Watercolor Masterpiece for ${APP_CONFIG.girlfriendName} & ${APP_CONFIG.boyfriendName}`, width / 2, 155);
-
-    // Date Details Box
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillRect(100, 200, width - 200, 460);
-    ctx.strokeStyle = '#dfe6ee';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(100, 200, width - 200, 460);
-
-    // Text Lines
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#3b4a63';
-    ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
-
-    const items = [
-      { icon: '📅', label: 'Date', val: selection.dayDate || 'To be decided' },
-      { icon: '⏰', label: 'Time', val: selection.customTime || selection.timeSlot || 'Afternoon' },
-      { icon: '🗺️', label: 'Location', val: selection.customLocation || selection.location || 'Secret spot' },
-      { icon: '🥤', label: 'Elixir', val: selection.customDrink || selection.drink || 'Lavender Lemonade' },
-      { icon: '🎨', label: 'Adventures', val: selection.activities.join(', ') || 'Exploring together' },
-      { icon: '❤️', label: 'Greeting', val: selection.greetings.join(', ') || 'Soft kiss & warm hug' },
-    ];
-
-    items.forEach((item, i) => {
-      const col = i < 3 ? 150 : 650;
-      const row = 270 + (i % 3) * 110;
-
-      ctx.fillStyle = '#c96f8a';
-      ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(`${item.icon} ${item.label.toUpperCase()}`, col, row);
-
-      ctx.fillStyle = '#3b4a63';
-      ctx.font = '22px "Plus Jakarta Sans", sans-serif';
-      const textVal = item.val.length > 32 ? item.val.substring(0, 30) + '...' : item.val;
-      ctx.fillText(textVal, col, row + 35);
-    });
-
-    // Draw Placed Stickers onto Canvas
-    stickers.forEach(s => {
-      ctx.save();
-      const posX = (s.x / 100) * width;
-      const posY = (s.y / 100) * height;
-      ctx.translate(posX, posY);
-      ctx.rotate((s.rotation * Math.PI) / 180);
-      ctx.font = `${Math.round(48 * s.scale)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(s.emoji, 0, 0);
-      ctx.restore();
-    });
-
-    // Signature footer
-    ctx.textAlign = 'center';
-    ctx.font = 'italic 24px "Caveat", cursive';
-    ctx.fillStyle = '#6d7a93';
-    ctx.fillText(`Hand-painted with boundless love for ${APP_CONFIG.girlfriendName} ❤️`, width / 2, 730);
-
-    // Download trigger
     try {
-      const link = document.createElement('a');
-      link.download = `Watercolor-Date-Invitation-${APP_CONFIG.girlfriendName}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch {
-      // Fallback
+      const dataUrl = await toPng(boardRef.current, {
+        quality: 1.0,
+        pixelRatio: 2.5, // 2.5x Ultra-Crisp Retina quality
+        cacheBust: true,
+        filter: (node) => {
+          if (node instanceof HTMLElement && node.classList.contains('export-exclude')) {
+            return false;
+          }
+          return true;
+        }
+      });
+      return dataUrl;
+    } catch (err) {
+      console.error('Failed to capture card snapshot:', err);
+      return null;
     } finally {
       setIsExporting(false);
     }
   };
+
+  useImperativeHandle(ref, () => ({
+    captureCard: captureCardSnapshot
+  }));
 
   return (
     <div className="w-full max-w-2xl mx-auto my-6">
@@ -186,35 +123,24 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
       <div className="paper-card p-4 rounded-2xl shadow-paper mb-4 border border-storybook-border">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-base">🎨</span>
+            <span className="text-base">{isMasterAlchemist ? '👑' : '🎨'}</span>
             <span className="text-xs font-semibold uppercase tracking-wider text-storybook-ink">
-              Sticker & Keepsake Decorator
+              {isMasterAlchemist ? 'Royal Keepsake Decorator' : 'Sticker & Keepsake Decorator'}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            {stickers.length > 0 && (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="text-[11px] font-handwriting text-storybook-inkLight hover:text-red-500 cursor-pointer"
-              >
-                Clear Stickers
-              </button>
-            )}
+          {stickers.length > 0 && (
             <button
               type="button"
-              onClick={handleExportPostcard}
-              disabled={isExporting}
-              className="text-xs font-semibold bg-storybook-rose text-white px-3.5 py-1.5 rounded-full shadow-sm hover:shadow-md hover:bg-storybook-roseDark transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              onClick={handleClearAll}
+              className="text-[11px] font-handwriting text-storybook-inkLight hover:text-red-500 cursor-pointer"
             >
-              <span>💌</span>
-              <span>{isExporting ? 'Painting...' : 'Export Keepsake PNG'}</span>
+              Clear Stickers
             </button>
-          </div>
+          )}
         </div>
 
         <p className="text-[11px] font-handwriting text-storybook-inkLight mb-3">
-          Tap any watercolor sticker to stamp & decorate our final invitation card!
+          Tap stickers to add them, and <strong>drag them anywhere</strong> across our date card! ✨
         </p>
 
         {/* Sticker Carousel */}
@@ -236,34 +162,141 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
         </div>
       </div>
 
-      {/* Decorated Card Canvas Container */}
+      {/* Decorated Card Canvas Container (Exact Card Export Target) */}
       <div
         ref={boardRef}
-        className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg relative overflow-hidden border border-storybook-border select-none"
+        className={`paper-card p-6 sm:p-8 rounded-3xl shadow-paper-lg relative overflow-hidden select-none transition-all ${
+          isMasterAlchemist
+            ? 'bg-gradient-to-br from-[#faf7ff] via-[#f5edff] to-[#ebe0fb] border-2 border-purple-300/80 shadow-[0_15px_40px_-5px_rgba(168,85,247,0.22)]'
+            : 'border border-storybook-border bg-white/95'
+        }`}
       >
         {/* Washi Tapes */}
-        <div className="washi-tape -top-2 left-8 w-24" />
-        <div className="washi-tape washi-tape-sage -top-2 right-8 w-24" />
+        {isMasterAlchemist ? (
+          <>
+            <div className="washi-tape -top-2 left-8 w-24 bg-purple-200/80 border-purple-300 shadow-2xs" />
+            <div className="washi-tape -top-2 right-8 w-24 bg-amber-200/80 border-amber-300 shadow-2xs" />
+          </>
+        ) : (
+          <>
+            <div className="washi-tape -top-2 left-8 w-24" />
+            <div className="washi-tape washi-tape-sage -top-2 right-8 w-24" />
+          </>
+        )}
+
+        {/* TOP-LEFT CORNER PAINTING SLOT */}
+        <div className="absolute top-4 left-4 z-20">
+          {customPainting ? (
+            /* Included Painting Mini Polaroid Frame */
+            <motion.div
+              initial={{ scale: 0.8, rotate: -4 }}
+              animate={{ scale: 1, rotate: -2 }}
+              whileHover={{ scale: 1.08, rotate: 0 }}
+              className="bg-white p-1.5 pb-2 rounded-xl shadow-paper border border-storybook-border/80 relative cursor-pointer group"
+              onClick={onOpenStudio}
+              title="Click to repaint or view full artwork"
+            >
+              {/* Washi tape on polaroid */}
+              <div className="washi-tape -top-1.5 left-2 w-10 opacity-90" />
+              <img
+                src={customPainting}
+                alt="Our Painting"
+                className="w-16 h-14 sm:w-20 sm:h-16 object-cover rounded-lg border border-storybook-border/60"
+              />
+              <div className="text-[9px] font-handwriting text-storybook-roseDark text-center mt-1 flex items-center justify-center gap-0.5">
+                <span>Our Art</span>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity export-exclude">✏️</span>
+              </div>
+            </motion.div>
+          ) : (
+            /* Optional Painting Placeholder Button (When not yet created) */
+            onOpenStudio && (
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.05, y: -1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  watercolorAudio.playWaterDrip(1.1);
+                  onOpenStudio();
+                }}
+                className={`border-2 border-dashed p-2 rounded-xl text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-2xs transition-all w-16 h-14 sm:w-20 sm:h-16 export-exclude ${
+                  isMasterAlchemist
+                    ? 'bg-purple-50/80 hover:bg-purple-100/90 border-purple-300 hover:border-purple-500'
+                    : 'bg-storybook-bg/80 hover:bg-storybook-blush border-storybook-rose/40 hover:border-storybook-rose'
+                }`}
+                title="Paint an artwork to include on this keepsake card (optional)"
+              >
+                <span className="text-base sm:text-lg animate-bounce">🎨</span>
+                <span
+                  className={`text-[8px] sm:text-[9px] font-bold leading-tight ${
+                    isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                  }`}
+                >
+                  + Add Art
+                </span>
+                <span className="text-[7px] font-handwriting text-storybook-inkLight hidden sm:block">
+                  (Optional)
+                </span>
+              </motion.button>
+            )
+          )}
+        </div>
 
         {/* Card Content Summary */}
-        <div className="text-center mb-5">
-          <div className="wax-seal mx-auto mb-2 w-10 h-10 text-sm shadow-seal">
-            {APP_CONFIG.boyfriendInitial}&{APP_CONFIG.girlfriendInitial}
+        <div className="text-center mb-5 mt-2">
+          <div
+            className={`wax-seal mx-auto mb-2 w-11 h-11 text-base shadow-seal flex items-center justify-center font-bold ${
+              isMasterAlchemist
+                ? 'bg-gradient-to-tr from-purple-700 via-fuchsia-600 to-amber-500 text-white ring-2 ring-purple-300'
+                : ''
+            }`}
+          >
+            {isMasterAlchemist ? '👑' : `${APP_CONFIG.boyfriendInitial}&${APP_CONFIG.girlfriendInitial}`}
           </div>
-          <h3 className="font-serif text-xl sm:text-2xl text-storybook-ink font-bold">
-            The Official Date Keepsake
+          <h3
+            className={`font-serif text-xl sm:text-2xl font-bold ${
+              isMasterAlchemist ? 'text-purple-950' : 'text-storybook-ink'
+            }`}
+          >
+            {isMasterAlchemist ? 'The Royal Alchemist Keepsake' : 'The Official Date Keepsake'}
           </h3>
-          <p className="font-handwriting text-base text-storybook-roseDark">
-            ~ Painted with love for {APP_CONFIG.girlfriendName} ~
+          <p
+            className={`font-handwriting text-base ${
+              isMasterAlchemist ? 'text-purple-700 font-bold' : 'text-storybook-roseDark'
+            }`}
+          >
+            {isMasterAlchemist
+              ? `~ Exclusive Royal Edition for Queen ${APP_CONFIG.girlfriendName} ~`
+              : `~ Painted with love for ${APP_CONFIG.girlfriendName} ~`}
           </p>
+
+          {isMasterAlchemist && (
+            <div className="inline-flex items-center gap-1.5 mt-2 bg-gradient-to-r from-purple-100 via-pink-100 to-amber-100 border border-purple-300 px-3.5 py-1 rounded-full text-xs font-bold text-purple-900 shadow-2xs">
+              <span>👑</span>
+              <span>Certified Master Alchemist of Love</span>
+              <span>✨</span>
+            </div>
+          )}
         </div>
 
         {/* Grid of Choices */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 bg-white/70 backdrop-blur-xs p-4 rounded-xl border border-storybook-border/60">
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 p-4 rounded-2xl border ${
+            isMasterAlchemist
+              ? 'bg-white/85 backdrop-blur-sm border-purple-200/80 shadow-xs'
+              : 'bg-white/70 backdrop-blur-xs border-storybook-border/60'
+          }`}
+        >
           <div className="flex items-center gap-2.5">
             <span className="text-xl">📅</span>
             <div>
-              <div className="text-[10px] font-bold text-storybook-roseDark uppercase">The Day</div>
+              <div
+                className={`text-[10px] font-bold uppercase ${
+                  isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                }`}
+              >
+                The Day
+              </div>
               <div className="text-xs font-semibold text-storybook-ink">{selection.dayDate || 'Not selected'}</div>
             </div>
           </div>
@@ -271,31 +304,65 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
           <div className="flex items-center gap-2.5">
             <span className="text-xl">⏰</span>
             <div>
-              <div className="text-[10px] font-bold text-storybook-roseDark uppercase">The Hour</div>
-              <div className="text-xs font-semibold text-storybook-ink">{selection.customTime || selection.timeSlot || 'Afternoon'}</div>
+              <div
+                className={`text-[10px] font-bold uppercase ${
+                  isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                }`}
+              >
+                The Hour
+              </div>
+              <div className="text-xs font-semibold text-storybook-ink">
+                {selection.customTime || selection.timeSlot || 'Afternoon'}
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5">
             <span className="text-xl">🗺️</span>
             <div>
-              <div className="text-[10px] font-bold text-storybook-roseDark uppercase">The Destination</div>
-              <div className="text-xs font-semibold text-storybook-ink">{selection.customLocation || selection.location || 'Secret spot'}</div>
+              <div
+                className={`text-[10px] font-bold uppercase ${
+                  isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                }`}
+              >
+                The Destination
+              </div>
+              <div className="text-xs font-semibold text-storybook-ink">
+                {selection.customLocation || selection.location || 'Secret spot'}
+              </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5">
             <span className="text-xl">🥤</span>
             <div>
-              <div className="text-[10px] font-bold text-storybook-roseDark uppercase">The Elixir</div>
-              <div className="text-xs font-semibold text-storybook-ink">{selection.customDrink || selection.drink || 'Lavender Lemonade'}</div>
+              <div
+                className={`text-[10px] font-bold uppercase ${
+                  isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                }`}
+              >
+                The Elixir
+              </div>
+              <div className="text-xs font-semibold text-storybook-ink">
+                {selection.customDrink || selection.drink || 'Lavender Lemonade'}
+              </div>
             </div>
           </div>
 
-          <div className="sm:col-span-2 flex items-start gap-2.5 pt-2 border-t border-storybook-border/40">
+          <div
+            className={`sm:col-span-2 flex items-start gap-2.5 pt-2 border-t ${
+              isMasterAlchemist ? 'border-purple-200/50' : 'border-storybook-border/40'
+            }`}
+          >
             <span className="text-xl">🎨</span>
             <div>
-              <div className="text-[10px] font-bold text-storybook-roseDark uppercase">Adventures</div>
+              <div
+                className={`text-[10px] font-bold uppercase ${
+                  isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+                }`}
+              >
+                Adventures
+              </div>
               <div className="text-xs font-semibold text-storybook-ink">
                 {selection.activities.length > 0 ? selection.activities.join(' • ') : 'Surprise adventure'}
               </div>
@@ -303,12 +370,92 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
           </div>
         </div>
 
-        {/* Dynamic Stamped Stickers Overlay Layer */}
+        {/* Unlocked Alchemist Perks Badge Section */}
+        {unlockedRecipes.length > 0 && (
+          <div
+            className={`mb-4 p-3 rounded-2xl text-left border ${
+              isMasterAlchemist
+                ? 'bg-purple-50/70 border-purple-200'
+                : 'bg-storybook-blush/60 border-storybook-rose/30'
+            }`}
+          >
+            <div
+              className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1 ${
+                isMasterAlchemist ? 'text-purple-800' : 'text-storybook-roseDark'
+              }`}
+            >
+              <span>🧪</span>
+              <span>Active Alchemist Perks ({unlockedRecipes.length} Unlocked):</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {unlockedRecipes.map((r) => (
+                <span
+                  key={r.id}
+                  className={`inline-flex items-center gap-1 bg-white/90 px-2 py-0.5 rounded-md text-[11px] font-medium text-storybook-ink border shadow-2xs ${
+                    r.isLegendary
+                      ? 'border-amber-400 bg-amber-50/90 font-bold text-amber-900'
+                      : isMasterAlchemist
+                      ? 'border-purple-200'
+                      : 'border-storybook-rose/20'
+                  }`}
+                  title={r.perkDesc}
+                >
+                  <span>{r.icon}</span>
+                  <span>{r.perkTitle}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* EXCLUSIVE BOTTOM-RIGHT STAMP: "LEGENDARY QUEEN 👑" (Only if Master Alchemist is discovered) */}
+        {isMasterAlchemist && (
+          <motion.div
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: -8 }}
+            transition={{ type: 'spring', damping: 15, delay: 0.3 }}
+            className="absolute bottom-3.5 right-3.5 z-20 pointer-events-none select-none"
+          >
+            <div className="relative flex items-center justify-center">
+              {/* Outer Golden/Purple Wax Seal Ring */}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-purple-800 via-fuchsia-700 to-amber-400 p-[3px] shadow-[0_8px_22px_rgba(147,51,234,0.35)] flex items-center justify-center">
+                {/* Inner Wax Texture */}
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 flex flex-col items-center justify-center text-center p-1 border-2 border-amber-300/80 shadow-inner">
+                  <span className="text-sm sm:text-base animate-bounce drop-shadow">👑</span>
+                  <span className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-widest text-amber-300 font-sans leading-tight mt-0.5">
+                    LEGENDARY
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white font-sans leading-tight">
+                    QUEEN
+                  </span>
+                  <div className="text-[6px] sm:text-[7px] text-amber-200/90 font-handwriting mt-0.5">
+                    ★ Certified ★
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Freely Draggable Stamped Stickers Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <AnimatePresence>
             {stickers.map((s) => (
               <motion.div
                 key={s.id}
+                drag
+                dragMomentum={false}
+                dragConstraints={boardRef}
+                onDragEnd={(_e, info) => {
+                  if (boardRef.current) {
+                    const rect = boardRef.current.getBoundingClientRect();
+                    const newX = Math.min(95, Math.max(5, ((info.point.x - rect.left) / rect.width) * 100));
+                    const newY = Math.min(95, Math.max(5, ((info.point.y - rect.top) / rect.height) * 100));
+                    setStickers((prev) =>
+                      prev.map((item) => (item.id === s.id ? { ...item, x: newX, y: newY } : item))
+                    );
+                  }
+                }}
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: s.scale, rotate: s.rotation }}
                 exit={{ scale: 0, opacity: 0 }}
@@ -318,7 +465,7 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
                   top: `${s.y}%`,
                   transform: 'translate(-50%, -50%)',
                 }}
-                className="pointer-events-auto cursor-pointer group"
+                className="pointer-events-auto cursor-grab active:cursor-grabbing group"
                 onClick={() => setSelectedStickerId(s.id)}
               >
                 <div className="relative">
@@ -329,7 +476,7 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
                     <button
                       type="button"
                       onClick={(e) => handleRemoveSticker(s.id, e)}
-                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center shadow-xs cursor-pointer"
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center shadow-xs cursor-pointer export-exclude"
                       title="Remove sticker"
                     >
                       ×
@@ -340,7 +487,66 @@ export const WatercolorStickerEasel: React.FC<WatercolorStickerEaselProps> = ({ 
             ))}
           </AnimatePresence>
         </div>
+
+        {/* EXPORTED VERSION ONLY: OFFICIAL BARCODE STRIP */}
+        {isExporting && (
+          <div className="mt-5 pt-3 border-t-2 border-dashed border-storybook-border/80 flex flex-col items-center justify-center gap-1 select-none bg-white/70 backdrop-blur-xs p-2.5 rounded-xl">
+            {/* High-Resolution SVG Barcode */}
+            <svg className="h-9 w-64 max-w-full text-storybook-ink" viewBox="0 0 280 40" fill="currentColor">
+              <rect x="0" y="0" width="3" height="40" />
+              <rect x="5" y="0" width="2" height="40" />
+              <rect x="9" y="0" width="5" height="40" />
+              <rect x="17" y="0" width="2" height="40" />
+              <rect x="22" y="0" width="4" height="40" />
+              <rect x="29" y="0" width="2" height="40" />
+              <rect x="34" y="0" width="6" height="40" />
+              <rect x="43" y="0" width="1" height="40" />
+              <rect x="46" y="0" width="4" height="40" />
+              <rect x="53" y="0" width="2" height="40" />
+              <rect x="58" y="0" width="5" height="40" />
+              <rect x="66" y="0" width="3" height="40" />
+              <rect x="72" y="0" width="2" height="40" />
+              <rect x="77" y="0" width="6" height="40" />
+              <rect x="86" y="0" width="2" height="40" />
+              <rect x="91" y="0" width="4" height="40" />
+              <rect x="98" y="0" width="1" height="40" />
+              <rect x="101" y="0" width="5" height="40" />
+              <rect x="109" y="0" width="2" height="40" />
+              <rect x="114" y="0" width="4" height="40" />
+              <rect x="121" y="0" width="3" height="40" />
+              <rect x="127" y="0" width="5" height="40" />
+              <rect x="135" y="0" width="2" height="40" />
+              <rect x="140" y="0" width="4" height="40" />
+              <rect x="147" y="0" width="2" height="40" />
+              <rect x="152" y="0" width="6" height="40" />
+              <rect x="161" y="0" width="1" height="40" />
+              <rect x="164" y="0" width="5" height="40" />
+              <rect x="172" y="0" width="3" height="40" />
+              <rect x="178" y="0" width="2" height="40" />
+              <rect x="183" y="0" width="5" height="40" />
+              <rect x="191" y="0" width="2" height="40" />
+              <rect x="196" y="0" width="4" height="40" />
+              <rect x="203" y="0" width="1" height="40" />
+              <rect x="207" y="0" width="6" height="40" />
+              <rect x="216" y="0" width="2" height="40" />
+              <rect x="221" y="0" width="4" height="40" />
+              <rect x="228" y="0" width="3" height="40" />
+              <rect x="234" y="0" width="5" height="40" />
+              <rect x="242" y="0" width="2" height="40" />
+              <rect x="247" y="0" width="4" height="40" />
+              <rect x="254" y="0" width="2" height="40" />
+              <rect x="259" y="0" width="6" height="40" />
+              <rect x="268" y="0" width="2" height="40" />
+              <rect x="273" y="0" width="4" height="40" />
+            </svg>
+            <div className="font-mono text-[8px] sm:text-[9px] tracking-widest uppercase font-bold text-storybook-ink">
+              {isMasterAlchemist
+                ? `👑 ROYAL-VIP-PASS • ${APP_CONFIG.girlfriendName.toUpperCase()} & ${APP_CONFIG.boyfriendName.toUpperCase()} • №2026-081723`
+                : `OFFICIAL-DATE-TICKET • ${APP_CONFIG.girlfriendName.toUpperCase()} & ${APP_CONFIG.boyfriendName.toUpperCase()} • №2026-081723`}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};
+});

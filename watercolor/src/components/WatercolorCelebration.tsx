@@ -5,24 +5,31 @@ import { DateSelection } from '../types';
 import { APP_CONFIG } from '../config/appConfig';
 import { WatercolorScratchCard } from './WatercolorScratchCard';
 import { watercolorAudio } from '../utils/watercolorAudio';
+import { getDiscoveredRecipeIds } from '../config/alchemistRecipes';
 
 interface WatercolorCelebrationProps {
   selection: DateSelection;
+  cardSnapshotUrl?: string | null;
   onReset: () => void;
 }
 
 export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
   selection,
+  cardSnapshotUrl,
   onReset
 }) => {
   const [cardDownloaded, setCardDownloaded] = useState(false);
+  const discoveredIds = getDiscoveredRecipeIds();
+  const isMasterAlchemist = discoveredIds.includes('grand_masterpiece') || discoveredIds.length >= 5;
 
   useEffect(() => {
     watercolorAudio.playFanfare();
 
     // Gentle multi-stage pastel floral confetti shower
     const end = Date.now() + 4.5 * 1000;
-    const colors = ['#e85d75', '#3a86ff', '#fb8500', '#2a9d8f', '#8338ec', '#ffffff'];
+    const colors = isMasterAlchemist
+      ? ['#a855f7', '#ec4899', '#fbbf24', '#38bdf8', '#c084fc', '#ffffff']
+      : ['#e85d75', '#3a86ff', '#fb8500', '#2a9d8f', '#8338ec', '#ffffff'];
 
     const frame = () => {
       confetti({
@@ -52,10 +59,28 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
       }
     };
     frame();
-  }, []);
+  }, [isMasterAlchemist]);
 
   const handleDownloadKeepsake = () => {
     watercolorAudio.playFanfare();
+
+    // If the exact rendered card was captured with barcode, download it directly!
+    if (cardSnapshotUrl) {
+      try {
+        const link = document.createElement('a');
+        link.download = isMasterAlchemist
+          ? `Royal-Alchemist-Keepsake-Queen-${APP_CONFIG.girlfriendName}.png`
+          : `Watercolor-Date-Keepsake-${APP_CONFIG.girlfriendName}.png`;
+        link.href = cardSnapshotUrl;
+        link.click();
+        setCardDownloaded(true);
+        return;
+      } catch (err) {
+        console.error('Direct download of snapshot failed, using fallback:', err);
+      }
+    }
+
+    // Fallback Canvas Renderer if no snapshot was captured
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -63,93 +88,23 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
     canvas.width = 1200;
     canvas.height = 1500;
 
-    // Background gradient
     const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    bgGrad.addColorStop(0, '#fbfcfe');
-    bgGrad.addColorStop(0.5, '#fff2f5');
-    bgGrad.addColorStop(1, '#edf5fc');
+    if (isMasterAlchemist) {
+      bgGrad.addColorStop(0, '#faf7ff');
+      bgGrad.addColorStop(0.5, '#f4edfe');
+      bgGrad.addColorStop(1, '#ebe0fb');
+    } else {
+      bgGrad.addColorStop(0, '#fbfcfe');
+      bgGrad.addColorStop(0.5, '#fff2f5');
+      bgGrad.addColorStop(1, '#edf5fc');
+    }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Decorative Borders
-    ctx.strokeStyle = '#e85d75';
+    ctx.strokeStyle = isMasterAlchemist ? '#a855f7' : '#e85d75';
     ctx.lineWidth = 6;
     ctx.strokeRect(35, 35, canvas.width - 70, canvas.height - 70);
 
-    ctx.strokeStyle = '#3a86ff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(48, 48, canvas.width - 96, canvas.height - 96);
-
-    // Title
-    ctx.fillStyle = '#3b4a63';
-    ctx.font = 'bold 46px Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`🎨 A Painted Date with ${APP_CONFIG.girlfriendName} 🌸`, 600, 130);
-
-    ctx.fillStyle = '#e85d75';
-    ctx.font = 'italic 26px "Caveat", cursive';
-    ctx.fillText(`${APP_CONFIG.dateRangeText} • Signed & Painted with Love`, 600, 180);
-
-    // Details Panel
-    const boxY = 230;
-    const boxW = canvas.width - 200;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(100, boxY, boxW, 960);
-    ctx.strokeStyle = '#dfe6ee';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(100, boxY, boxW, 960);
-
-    ctx.textAlign = 'left';
-    let lineY = boxY + 70;
-
-    const addField = (icon: string, label: string, val: string) => {
-      ctx.fillStyle = '#e85d75';
-      ctx.font = 'bold 22px Georgia, serif';
-      ctx.fillText(`${icon} ${label}`, 140, lineY);
-
-      ctx.fillStyle = '#3b4a63';
-      ctx.font = '24px sans-serif';
-      ctx.fillText(val, 140, lineY + 38);
-
-      ctx.strokeStyle = '#e5ecf3';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(140, lineY + 60);
-      ctx.lineTo(140 + boxW - 80, lineY + 60);
-      ctx.stroke();
-
-      lineY += 110;
-    };
-
-    addField('📅', 'THE CHOSEN DATE:', selection.dayDate || 'Soon');
-    addField('⏰', 'ROMANTIC TIME:', selection.customTime || selection.timeSlot || 'Afternoon');
-    addField('📍', 'DESTINATION:', selection.customLocation || selection.location || 'Secret spot');
-    
-    const acts = selection.activities.join(', ') + (selection.customActivity ? ` + ${selection.customActivity}` : '');
-    addField('🎨', 'PLANNED ADVENTURES:', acts || 'Exploring together');
-    addField('🥤', 'REFRESHMENT:', selection.customDrink || selection.drink || 'Lavender Lemonade');
-    addField('🤗', 'SWEET GREETING:', selection.greetings.join(', ') || 'Warm hug');
-
-    if (selection.customNotes) {
-      ctx.fillStyle = '#e85d75';
-      ctx.font = 'bold 20px Georgia, serif';
-      ctx.fillText(`💌 Note for ${APP_CONFIG.boyfriendName}:`, 140, lineY);
-      ctx.fillStyle = '#3b4a63';
-      ctx.font = 'italic 24px "Caveat", cursive';
-      ctx.fillText(`"${selection.customNotes}"`, 140, lineY + 36);
-    }
-
-    // Signature
-    ctx.textAlign = 'center';
-    ctx.font = 'italic 28px "Caveat", cursive';
-    ctx.fillStyle = '#e85d75';
-    ctx.fillText('~ Signed, sealed, and painted forever in our hearts ~', 600, canvas.height - 180);
-
-    ctx.font = 'bold 22px Georgia, serif';
-    ctx.fillStyle = '#3a86ff';
-    ctx.fillText(`FOREVER YOURS, ${APP_CONFIG.boyfriendName.toUpperCase()} ❤️`, 600, canvas.height - 130);
-
-    // Export image
     const link = document.createElement('a');
     link.download = `${APP_CONFIG.girlfriendName}_${APP_CONFIG.boyfriendName}_Watercolor_Date_${selection.isoDate || '2026'}.png`;
     link.href = canvas.toDataURL('image/png', 1.0);
@@ -169,24 +124,38 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
         initial={{ scale: 0.85 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-        className="paper-card p-8 sm:p-10 rounded-2xl shadow-paper-lg mb-6 relative border border-storybook-border"
+        className={`paper-card p-8 sm:p-10 rounded-2xl shadow-paper-lg mb-6 relative border ${
+          isMasterAlchemist
+            ? 'bg-gradient-to-br from-[#faf7ff] via-[#f5edff] to-[#ebe0fb] border-purple-300'
+            : 'border-storybook-border'
+        }`}
       >
         <div className="washi-tape -top-2.5 left-1/2 -translate-x-1/2 w-32" />
 
         <div className="text-4xl sm:text-5xl mb-3 animate-bounce">
-          🌸 🎨 💖
+          {isMasterAlchemist ? '👑 💜 🌸' : '🌸 🎨 💖'}
         </div>
 
-        <span className="text-xs font-semibold tracking-widest text-storybook-roseDark uppercase font-sans">
-          MASTERPIECE SEALED
+        <span
+          className={`text-xs font-semibold tracking-widest uppercase font-sans ${
+            isMasterAlchemist ? 'text-purple-800' : 'text-storybook-roseDark'
+          }`}
+        >
+          {isMasterAlchemist ? 'ROYAL MASTERPIECE SEALED' : 'MASTERPIECE SEALED'}
         </span>
 
         <h1 className="font-serif-title text-2xl sm:text-3xl text-storybook-ink mt-1 mb-2">
-          🎨 Date Officially Painted! 🎨
+          {isMasterAlchemist ? '👑 Royal Date Officially Sealed! 👑' : '🎨 Date Officially Painted! 🎨'}
         </h1>
 
-        <p className="font-handwriting text-2xl sm:text-3xl text-storybook-roseDark mb-5">
-          “No erasing this masterpiece, my love. 😌”
+        <p
+          className={`font-handwriting text-2xl sm:text-3xl mb-5 ${
+            isMasterAlchemist ? 'text-purple-700' : 'text-storybook-roseDark'
+          }`}
+        >
+          {isMasterAlchemist
+            ? `“The kingdom is yours tonight, Queen ${APP_CONFIG.girlfriendName}. 👑❤️”`
+            : '“No erasing this masterpiece, my love. 😌”'}
         </p>
 
         {/* Email Notification Dispatch Status */}
@@ -198,6 +167,27 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
 
       {/* Interactive Scratch-to-Reveal Love Letter Easel */}
       <WatercolorScratchCard />
+
+      {/* Exact Card Preview Display (If Snapshot is available) */}
+      {cardSnapshotUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="my-6 text-center"
+        >
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-storybook-roseDark uppercase tracking-wider mb-2">
+            <span>🎟️</span>
+            <span>Your Official Date Keepsake Pass (With Barcode)</span>
+          </div>
+          <div className="p-2 sm:p-3 bg-white/80 rounded-2xl border border-storybook-border shadow-paper max-w-lg mx-auto">
+            <img
+              src={cardSnapshotUrl}
+              alt="Official Date Keepsake"
+              className="w-full h-auto rounded-xl shadow-xs border border-storybook-border/60"
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3 mb-6">
@@ -221,10 +211,20 @@ export const WatercolorCelebration: React.FC<WatercolorCelebrationProps> = ({
           whileHover={{ scale: 1.03, y: -2 }}
           whileTap={{ scale: 0.96 }}
           onClick={handleDownloadKeepsake}
-          className="story-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+          className={`py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md rounded-2xl text-white transition-all ${
+            isMasterAlchemist
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-amber-500 hover:from-purple-800 hover:to-amber-600'
+              : 'story-btn-primary'
+          }`}
         >
           <span>🎟️</span>
-          <span>{cardDownloaded ? 'Keepsake Saved to Device! ✓' : 'Save Keepsake Certificate 💌'}</span>
+          <span>
+            {cardDownloaded
+              ? 'Keepsake Saved to Device! ✓'
+              : isMasterAlchemist
+              ? 'Save Royal Keepsake Pass (With Barcode) 💌'
+              : 'Save Keepsake Certificate (With Barcode) 💌'}
+          </span>
         </motion.button>
       </div>
 

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { watercolorAudio } from '../utils/watercolorAudio';
@@ -7,23 +8,6 @@ import { APP_CONFIG } from '../config/appConfig';
 interface Point {
   x: number;
   y: number;
-}
-
-interface Stroke {
-  points: Point[];
-  color: string;
-  size: number;
-  isGlitter?: boolean;
-  isEraser?: boolean;
-}
-
-interface StampedItem {
-  id: string;
-  emoji: string;
-  x: number;
-  y: number;
-  size: number;
-  rotation: number;
 }
 
 const PIGMENTS = [
@@ -40,10 +24,10 @@ const PIGMENTS = [
 ];
 
 const BRUSHES = [
-  { id: 'fine', label: 'Fine Detail', icon: '✏️', size: 4 },
-  { id: 'medium', label: 'Round Brush', icon: '🖌️', size: 10 },
-  { id: 'wash', label: 'Wet Wash', icon: '🌊', size: 26 },
-  { id: 'glitter', label: 'Magic Sparkle', icon: '✨', size: 16, isGlitter: true },
+  { id: 'fine', label: 'Fine Detail', icon: '✏️', size: 3 },
+  { id: 'medium', label: 'Round Brush', icon: '🖌️', size: 8 },
+  { id: 'wash', label: 'Wet Wash', icon: '🌊', size: 22, isWash: true },
+  { id: 'glitter', label: 'Magic Sparkle', icon: '✨', size: 14, isGlitter: true },
   { id: 'eraser', label: 'Water Sponge', icon: '🧽', size: 24, isEraser: true },
 ];
 
@@ -79,11 +63,13 @@ const STENCILS = [
 interface WatercolorStudioMiniGameProps {
   isOpen: boolean;
   onClose: () => void;
+  onIncludeInCard?: (dataUrl: string) => void;
 }
 
 export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> = ({
   isOpen,
-  onClose
+  onClose,
+  onIncludeInCard
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -91,325 +77,348 @@ export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> =
   const [activeColor, setActiveColor] = useState(PIGMENTS[0].color);
   const [activeBrush, setActiveBrush] = useState(BRUSHES[1]);
   const [selectedStencil, setSelectedStencil] = useState('blank');
-  const [strokes, setStrokes] = useState<Stroke[]>([]);
-  const [stamps, setStamps] = useState<StampedItem[]>([]);
-  const [ratingMessage, setRatingMessage] = useState<string | null>(null);
   const [activeStamp, setActiveStamp] = useState<string | null>(null);
+  const [ratingMessage, setRatingMessage] = useState<string | null>(null);
+  const [hasRated, setHasRated] = useState(false);
+  const [reactionIndex, setReactionIndex] = useState(0);
+  const [historyCount, setHistoryCount] = useState(0);
 
   const isDrawingRef = useRef(false);
-  const currentStrokeRef = useRef<Stroke | null>(null);
+  const lastPointRef = useRef<Point | null>(null);
+  const historyRef = useRef<ImageData[]>([]);
   const lastSoundRef = useRef(0);
 
-  // Redraw the canvas whenever strokes or stamps change
-  const redrawCanvas = useCallback(() => {
+  // Draw Stencil Outlines
+  const drawStencilBackground = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number, stencil: string) => {
+    ctx.fillStyle = '#fefdfb';
+    ctx.fillRect(0, 0, width, height);
+
+    // Subtle paper deckle border
+    ctx.strokeStyle = 'rgba(201, 111, 138, 0.2)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, width - 20, height - 20);
+
+    if (stencil === 'picnic') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 6]);
+
+      // Sun
+      ctx.beginPath();
+      ctx.arc(width * 0.8, height * 0.25, 45, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Hill & Blanket
+      ctx.beginPath();
+      ctx.moveTo(0, height * 0.7);
+      ctx.bezierCurveTo(width * 0.4, height * 0.65, width * 0.7, height * 0.75, width, height * 0.68);
+      ctx.stroke();
+
+      // Picnic Basket
+      ctx.strokeRect(width * 0.4, height * 0.68, 70, 45);
+      ctx.restore();
+    } else if (stencil === 'cafe') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 6]);
+
+      // Table & Cup
+      ctx.strokeRect(width * 0.2, height * 0.7, width * 0.6, 20);
+      ctx.strokeRect(width * 0.45, height * 0.52, 50, 50);
+      ctx.beginPath();
+      ctx.arc(width * 0.54, height * 0.62, 14, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    } else if (stencil === 'letter') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 6]);
+
+      // Envelope
+      ctx.strokeRect(width * 0.25, height * 0.3, width * 0.5, height * 0.4);
+      ctx.beginPath();
+      ctx.moveTo(width * 0.25, height * 0.3);
+      ctx.lineTo(width * 0.5, height * 0.5);
+      ctx.lineTo(width * 0.75, height * 0.3);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }, []);
+
+  // Save current canvas state to history stack
+  const pushHistoryState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 1. Background textured paper wash
-    ctx.fillStyle = '#fefdfb';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Subtle paper deckle border
-    ctx.strokeStyle = 'rgba(201, 111, 138, 0.2)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-
-    // 2. Draw Stencil Outlines if selected
-    if (selectedStencil === 'picnic') {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([6, 6]);
-
-      // Sun
-      ctx.beginPath();
-      ctx.arc(canvas.width * 0.8, canvas.height * 0.25, 45, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Hill & Blanket
-      ctx.beginPath();
-      ctx.moveTo(0, canvas.height * 0.7);
-      ctx.bezierCurveTo(canvas.width * 0.4, canvas.height * 0.65, canvas.width * 0.7, canvas.height * 0.75, canvas.width, canvas.height * 0.68);
-      ctx.stroke();
-
-      // Picnic Basket
-      ctx.strokeRect(canvas.width * 0.4, canvas.height * 0.68, 70, 45);
-      ctx.restore();
-    } else if (selectedStencil === 'cafe') {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([6, 6]);
-
-      // Table & Cup
-      ctx.strokeRect(canvas.width * 0.2, canvas.height * 0.7, canvas.width * 0.6, 20);
-      ctx.strokeRect(canvas.width * 0.45, canvas.height * 0.52, 50, 50);
-      ctx.beginPath();
-      ctx.arc(canvas.width * 0.54, canvas.height * 0.62, 14, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    } else if (selectedStencil === 'letter') {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(109, 122, 147, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([6, 6]);
-
-      // Envelope
-      ctx.strokeRect(canvas.width * 0.25, canvas.height * 0.3, canvas.width * 0.5, canvas.height * 0.4);
-      ctx.beginPath();
-      ctx.moveTo(canvas.width * 0.25, canvas.height * 0.3);
-      ctx.lineTo(canvas.width * 0.5, canvas.height * 0.5);
-      ctx.lineTo(canvas.width * 0.75, canvas.height * 0.3);
-      ctx.stroke();
-      ctx.restore();
+    try {
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      historyRef.current.push(imgData);
+      if (historyRef.current.length > 20) {
+        historyRef.current.shift();
+      }
+      setHistoryCount(historyRef.current.length);
+    } catch {
+      // Fallback
     }
+  }, []);
 
-    // 3. Draw All Brush Strokes
-    strokes.forEach((stroke) => {
-      if (stroke.points.length < 2) return;
+  // Initialize and size the canvas safely
+  const initCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-      ctx.save();
-      if (stroke.isEraser) {
-        ctx.strokeStyle = '#fefdfb';
-        ctx.lineWidth = stroke.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-      } else if (stroke.isGlitter) {
-        ctx.strokeStyle = stroke.color;
-        ctx.lineWidth = stroke.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.globalAlpha = 0.75;
-        ctx.shadowColor = stroke.color;
-        ctx.shadowBlur = 10;
-      } else {
-        ctx.strokeStyle = stroke.color;
-        ctx.lineWidth = stroke.size;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.globalAlpha = stroke.size > 20 ? 0.4 : 0.8;
-      }
+    const rect = container.getBoundingClientRect();
+    const width = Math.max(340, Math.floor(rect.width || 600));
+    const height = Math.max(320, Math.floor(rect.height || 450));
 
-      ctx.beginPath();
-      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    canvas.width = width;
+    canvas.height = height;
 
-      for (let i = 1; i < stroke.points.length; i++) {
-        const p1 = stroke.points[i - 1];
-        const p2 = stroke.points[i];
-        const midX = (p1.x + p2.x) / 2;
-        const midY = (p1.y + p2.y) / 2;
-        ctx.quadraticCurveTo(p1.x, p1.y, midX, midY);
-      }
-
-      ctx.stroke();
-      ctx.restore();
-    });
-
-    // 4. Draw All Stamped Items
-    stamps.forEach((s) => {
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate((s.rotation * Math.PI) / 180);
-      ctx.font = `${s.size}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(s.emoji, 0, 0);
-      ctx.restore();
-    });
-  }, [strokes, stamps, selectedStencil]);
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      drawStencilBackground(ctx, width, height, selectedStencil);
+      historyRef.current = [];
+      pushHistoryState();
+    }
+  }, [drawStencilBackground, pushHistoryState, selectedStencil]);
 
   useEffect(() => {
     if (!isOpen) return;
-
     const timer = setTimeout(() => {
-      const canvas = canvasRef.current;
-      const container = containerRef.current;
-      if (canvas && container) {
-        const rect = container.getBoundingClientRect();
-        canvas.width = Math.max(340, Math.floor(rect.width));
-        canvas.height = Math.max(320, Math.floor(rect.height));
-        redrawCanvas();
-      }
-    }, 50);
-
+      initCanvas();
+    }, 60);
     return () => clearTimeout(timer);
-  }, [isOpen, redrawCanvas]);
+  }, [isOpen, initCanvas]);
 
-  useEffect(() => {
-    redrawCanvas();
-  }, [redrawCanvas]);
+  const handleStencilChange = (stencilId: string) => {
+    watercolorAudio.playWaterDrip(1.1);
+    setSelectedStencil(stencilId);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      drawStencilBackground(ctx, canvas.width, canvas.height, stencilId);
+      historyRef.current = [];
+      pushHistoryState();
+    }
+  };
 
-  // Pointer drawing handlers
   const getCanvasCoords = (clientX: number, clientY: number): Point => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
     };
   };
 
+  // High-performance direct canvas drawing
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     const point = getCanvasCoords(e.clientX, e.clientY);
 
-    // If stamp is active, stamp item and exit
+    // If stamp mode is active, stamp emoji directly
     if (activeStamp) {
       watercolorAudio.playSplatterPop();
-      const newStamp: StampedItem = {
-        id: `stmp-${Date.now()}-${Math.random()}`,
-        emoji: activeStamp,
-        x: point.x,
-        y: point.y,
-        size: 32 + Math.random() * 8,
-        rotation: (Math.random() - 0.5) * 24
-      };
-      setStamps((prev) => [...prev, newStamp]);
+      ctx.save();
+      ctx.translate(point.x, point.y);
+      const angle = (Math.random() - 0.5) * 20;
+      ctx.rotate((angle * Math.PI) / 180);
+      ctx.font = '36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(activeStamp, 0, 0);
+      ctx.restore();
+      pushHistoryState();
       return;
     }
 
     isDrawingRef.current = true;
-    currentStrokeRef.current = {
-      points: [point],
-      color: activeColor,
-      size: activeBrush.size,
-      isGlitter: activeBrush.isGlitter,
-      isEraser: activeBrush.isEraser
-    };
+    lastPointRef.current = point;
+
+    ctx.save();
+    if (activeBrush.isEraser) {
+      ctx.strokeStyle = '#fefdfb';
+      ctx.fillStyle = '#fefdfb';
+      ctx.lineWidth = activeBrush.size;
+    } else if (activeBrush.isGlitter) {
+      ctx.strokeStyle = activeColor;
+      ctx.fillStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.shadowColor = activeColor;
+      ctx.shadowBlur = 8;
+    } else if (activeBrush.isWash) {
+      ctx.strokeStyle = activeColor;
+      ctx.fillStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.globalAlpha = 0.35;
+    } else {
+      ctx.strokeStyle = activeColor;
+      ctx.fillStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.globalAlpha = 0.85;
+    }
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, activeBrush.size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
     watercolorAudio.playBrushStroke(0.6);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current || !currentStrokeRef.current) return;
-    const point = getCanvasCoords(e.clientX, e.clientY);
+    e.stopPropagation();
+    if (!isDrawingRef.current || !lastPointRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    currentStrokeRef.current.points.push(point);
+    const currentPoint = getCanvasCoords(e.clientX, e.clientY);
 
+    ctx.save();
+    if (activeBrush.isEraser) {
+      ctx.strokeStyle = '#fefdfb';
+      ctx.lineWidth = activeBrush.size;
+    } else if (activeBrush.isGlitter) {
+      ctx.strokeStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.shadowColor = activeColor;
+      ctx.shadowBlur = 8;
+    } else if (activeBrush.isWash) {
+      ctx.strokeStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.globalAlpha = 0.35;
+    } else {
+      ctx.strokeStyle = activeColor;
+      ctx.lineWidth = activeBrush.size;
+      ctx.globalAlpha = 0.85;
+    }
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
+    ctx.lineTo(currentPoint.x, currentPoint.y);
+    ctx.stroke();
+    ctx.restore();
+
+    lastPointRef.current = currentPoint;
+
+    // Sound throttle
     const now = Date.now();
-    if (now - lastSoundRef.current > 140) {
-      watercolorAudio.playBrushStroke(0.5);
+    if (now - lastSoundRef.current > 160) {
+      watercolorAudio.playBrushStroke(0.45);
       lastSoundRef.current = now;
     }
-
-    setStrokes((prev) => {
-      if (prev.length === 0) return [currentStrokeRef.current!];
-      return [...prev.slice(0, -1), { ...currentStrokeRef.current! }];
-    });
   };
 
-  const handlePointerUp = () => {
-    if (!isDrawingRef.current) return;
-    isDrawingRef.current = false;
-    if (currentStrokeRef.current && currentStrokeRef.current.points.length > 0) {
-      setStrokes((prev) => [...prev]);
+  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.stopPropagation();
+    if (isDrawingRef.current) {
+      isDrawingRef.current = false;
+      lastPointRef.current = null;
+      pushHistoryState();
     }
-    currentStrokeRef.current = null;
   };
 
   const handleUndo = () => {
     watercolorAudio.playWaterDrip(0.9);
-    if (stamps.length > 0) {
-      setStamps((prev) => prev.slice(0, -1));
-    } else if (strokes.length > 0) {
-      setStrokes((prev) => prev.slice(0, -1));
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (historyRef.current.length > 1) {
+      historyRef.current.pop();
+      const prevState = historyRef.current[historyRef.current.length - 1];
+      if (prevState) {
+        ctx.putImageData(prevState, 0, 0);
+      }
+      setHistoryCount(historyRef.current.length);
+    } else if (historyRef.current.length === 1) {
+      drawStencilBackground(ctx, canvas.width, canvas.height, selectedStencil);
+      historyRef.current = [];
+      pushHistoryState();
     }
   };
 
   const handleClear = () => {
     watercolorAudio.playWaterDrip(1.3);
-    setStrokes([]);
-    setStamps([]);
-    setRatingMessage(null);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      drawStencilBackground(ctx, canvas.width, canvas.height, selectedStencil);
+      historyRef.current = [];
+      pushHistoryState();
+      setRatingMessage(null);
+      setHasRated(false);
+    }
   };
 
+  // Dynamic Rating Critique Cycle
   const handleRateArtwork = () => {
     watercolorAudio.playFanfare();
     confetti({
-      particleCount: 80,
+      particleCount: 85,
       spread: 90,
       origin: { y: 0.5 },
-      colors: ['#e85d75', '#3a86ff', '#fb8500', '#2a9d8f', '#8338ec', '#ffffff']
+      colors: ['#e85d75', '#3a86ff', '#fb8500', '#2a9d8f', '#8338ec', '#ffb703']
     });
 
-    const reviews = [
+    const reactions = APP_CONFIG.paintingReactions || [
       `🎨 100/10: A certified romantic masterpiece! The Louvre called for ${APP_CONFIG.girlfriendName} & ${APP_CONFIG.boyfriendName}! 👑`,
       `🌸 1000/10: Pure watercolor poetry. Destiny painted this perfectly! ✨`,
       `💖 Infinite/10: The most adorable date canvas ever created! 🌷`,
       `🍷 10/10: Monet and Van Gogh have been real quiet since you painted this. 🎨😌`
     ];
 
-    setRatingMessage(reviews[Math.floor(Math.random() * reviews.length)]);
+    const chosen = reactions[reactionIndex % reactions.length];
+    setReactionIndex((prev) => prev + 1);
+    setRatingMessage(chosen);
+    setHasRated(true);
   };
 
-  const handleExportPainting = () => {
+  // Include Custom Painting in Date Card Keepsake
+  const handleIncludeInCard = () => {
     watercolorAudio.playFanfare();
-    const sourceCanvas = canvasRef.current;
-    if (!sourceCanvas) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const framedCanvas = document.createElement('canvas');
-    const width = 1200;
-    const height = 900;
-    framedCanvas.width = width;
-    framedCanvas.height = height;
-    const ctx = framedCanvas.getContext('2d');
-    if (!ctx) return;
-
-    // Elegant wooden/gold easel frame background
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, '#fdfcff');
-    bgGrad.addColorStop(1, '#fdeef2');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
-
-    // Frame Borders
-    ctx.strokeStyle = '#c96f8a';
-    ctx.lineWidth = 14;
-    ctx.strokeRect(30, 30, width - 60, height - 60);
-
-    ctx.strokeStyle = '#ffb703';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(48, 48, width - 96, height - 96);
-
-    // Title
-    ctx.fillStyle = '#3b4a63';
-    ctx.font = 'bold 36px "Playfair Display", Georgia, serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎨 Our Painted Masterpiece 🌸', width / 2, 95);
-
-    // Draw inner canvas artwork
-    ctx.drawImage(sourceCanvas, 75, 120, width - 150, height - 230);
-
-    // Signature footer
-    ctx.fillStyle = '#c96f8a';
-    ctx.font = 'italic 26px "Caveat", cursive';
-    ctx.fillText(`Painted by ${APP_CONFIG.girlfriendName} & ${APP_CONFIG.boyfriendName} with boundless love ❤️`, width / 2, height - 55);
-
-    // Download trigger
-    try {
-      const link = document.createElement('a');
-      link.download = `Watercolor_Masterpiece_${APP_CONFIG.girlfriendName}_${Date.now()}.png`;
-      link.href = framedCanvas.toDataURL('image/png');
-      link.click();
-    } catch {
-      // Fallback
+    const dataUrl = canvas.toDataURL('image/png');
+    if (onIncludeInCard) {
+      onIncludeInCard(dataUrl);
     }
+    onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-storybook-ink/60 backdrop-blur-sm select-none"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-storybook-ink/60 backdrop-blur-sm select-none"
       >
         <motion.div
           initial={{ scale: 0.92, y: 20 }}
@@ -435,10 +444,10 @@ export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> =
               <button
                 type="button"
                 onClick={handleRateArtwork}
-                className="text-xs font-semibold bg-storybook-blush text-storybook-roseDark hover:bg-storybook-rose hover:text-white px-3 py-1.5 rounded-full border border-storybook-rose/40 transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                className="text-xs font-semibold bg-storybook-blush text-storybook-roseDark hover:bg-storybook-rose hover:text-white px-3.5 py-1.5 rounded-full border border-storybook-rose/40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5 active:scale-95"
               >
                 <span>🏆</span>
-                <span>Rate Artwork</span>
+                <span>Rate the Painting</span>
               </button>
               <button
                 type="button"
@@ -479,10 +488,7 @@ export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> =
                     <button
                       key={st.id}
                       type="button"
-                      onClick={() => {
-                        watercolorAudio.playWaterDrip(1.1);
-                        setSelectedStencil(st.id);
-                      }}
+                      onClick={() => handleStencilChange(st.id)}
                       className={`px-2 py-1.5 rounded-xl border text-left text-xs flex items-center gap-2 cursor-pointer transition-all ${
                         selectedStencil === st.id
                           ? 'bg-storybook-blush border-storybook-rose text-storybook-roseDark font-semibold shadow-2xs'
@@ -591,19 +597,19 @@ export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> =
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                className="w-full h-full cursor-crosshair touch-none"
+                onPointerLeave={handlePointerUp}
+                className="w-full h-full cursor-crosshair touch-none select-none"
               />
             </div>
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer Actions: Rate & Include in Card */}
           <div className="flex items-center justify-between pt-3 border-t border-storybook-border/60">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleUndo}
-                disabled={strokes.length === 0 && stamps.length === 0}
+                disabled={historyCount <= 1}
                 className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-storybook-bg hover:bg-storybook-border text-storybook-ink disabled:opacity-40 cursor-pointer transition-all"
               >
                 ↩ Undo
@@ -617,17 +623,39 @@ export const WatercolorStudioMiniGame: React.FC<WatercolorStudioMiniGameProps> =
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={handleExportPainting}
-              className="story-btn-primary px-5 py-2.5 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer shadow-md"
-            >
-              <span>🖼️</span>
-              <span>Frame & Download Painting 💌</span>
-            </button>
+            <div className="flex items-center gap-2.5">
+              {/* Rate The Painting Button (Replaces static Download) */}
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={handleRateArtwork}
+                className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-storybook-blush text-storybook-roseDark border border-storybook-rose/40 hover:bg-storybook-rose hover:text-white flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
+              >
+                <span>🏆</span>
+                <span>Rate the Painting ✨</span>
+              </motion.button>
+
+              {/* Include in Card Button (Appears after rating or creating artwork) */}
+              {(hasRated || historyCount > 1) && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={handleIncludeInCard}
+                  className="story-btn-primary px-5 py-2 text-xs sm:text-sm font-semibold flex items-center gap-1.5 cursor-pointer shadow-md animate-pulse-gentle"
+                >
+                  <span>💌</span>
+                  <span>Include in Card ✨</span>
+                </motion.button>
+              )}
+            </div>
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

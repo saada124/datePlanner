@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { DateSelection } from '../types';
 import { watercolorAudio } from '../utils/watercolorAudio';
-import { WatercolorStickerEasel } from './WatercolorStickerEasel';
+import { WatercolorStickerEasel, WatercolorStickerEaselHandle } from './WatercolorStickerEasel';
+import { getDiscoveredRecipeIds } from '../config/alchemistRecipes';
 
 interface WatercolorFinalCardProps {
   selection: DateSelection;
-  onConfirm: () => void;
+  customPainting?: string | null;
+  onConfirm: (cardSnapshotDataUrl?: string) => void;
   onEdit: () => void;
+  onOpenStudio?: () => void;
 }
 
 export const WatercolorFinalCard: React.FC<WatercolorFinalCardProps> = ({
   selection,
+  customPainting,
   onConfirm,
-  onEdit
+  onEdit,
+  onOpenStudio
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const easelRef = useRef<WatercolorStickerEaselHandle | null>(null);
+
+  const discoveredIds = getDiscoveredRecipeIds();
+  const isMasterAlchemist = discoveredIds.includes('grand_masterpiece') || discoveredIds.length >= 5;
 
   const handleConfirmDate = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setIsSubmitting(true);
@@ -27,14 +36,24 @@ export const WatercolorFinalCard: React.FC<WatercolorFinalCardProps> = ({
         detail: {
           x: rect.left + rect.width / 2,
           y: rect.top + rect.height / 2,
-          color: '#e85d75'
+          color: isMasterAlchemist ? '#a855f7' : '#e85d75'
         }
       })
     );
 
+    // Capture the exact card DOM snapshot with barcode
+    let snapshotDataUrl: string | null = null;
+    try {
+      if (easelRef.current) {
+        snapshotDataUrl = await easelRef.current.captureCard();
+      }
+    } catch (err) {
+      console.error('Card capture before confirmation error:', err);
+    }
+
     setTimeout(() => {
-      onConfirm();
-    }, 450);
+      onConfirm(snapshotDataUrl || undefined);
+    }, 400);
   };
 
   return (
@@ -45,14 +64,27 @@ export const WatercolorFinalCard: React.FC<WatercolorFinalCardProps> = ({
       className="max-w-2xl mx-auto w-full px-3 pb-16 text-center select-none"
     >
       {/* Header Tag */}
-      <div className="inline-flex items-center gap-2 bg-storybook-blush text-storybook-roseDark font-serif text-xs font-semibold px-4 py-1.5 rounded-full border border-storybook-rose mb-2 shadow-2xs">
-        <span>🎨</span>
-        <span>OUR PAINTED MASTERPIECE PROCLAMATION</span>
-        <span>🎨</span>
-      </div>
+      {isMasterAlchemist ? (
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 via-pink-100 to-amber-100 text-purple-950 font-serif text-xs font-bold px-4 py-1.5 rounded-full border border-purple-300 mb-2 shadow-2xs">
+          <span>👑</span>
+          <span>EXCLUSIVE ROYAL AMETHYST MASTERPIECE</span>
+          <span>✨</span>
+        </div>
+      ) : (
+        <div className="inline-flex items-center gap-2 bg-storybook-blush text-storybook-roseDark font-serif text-xs font-semibold px-4 py-1.5 rounded-full border border-storybook-rose mb-2 shadow-2xs">
+          <span>🎨</span>
+          <span>OUR PAINTED MASTERPIECE PROCLAMATION</span>
+          <span>🎨</span>
+        </div>
+      )}
 
       {/* Interactive Sticker & Keepsake Decorator Easel */}
-      <WatercolorStickerEasel selection={selection} />
+      <WatercolorStickerEasel
+        ref={easelRef}
+        selection={selection}
+        customPainting={customPainting}
+        onOpenStudio={onOpenStudio}
+      />
 
       {/* Confirm & Edit Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
@@ -74,11 +106,23 @@ export const WatercolorFinalCard: React.FC<WatercolorFinalCardProps> = ({
           whileTap={{ scale: 0.96 }}
           disabled={isSubmitting}
           onClick={handleConfirmDate}
-          className="story-btn-primary px-9 py-4 text-sm sm:text-base order-1 sm:order-2 flex items-center gap-2 cursor-pointer shadow-lg font-bold"
+          className={`story-btn-primary px-9 py-4 text-sm sm:text-base order-1 sm:order-2 flex items-center gap-2 cursor-pointer shadow-lg font-bold text-white ${
+            isMasterAlchemist
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-amber-500 hover:from-purple-800 hover:to-amber-600'
+              : ''
+          }`}
         >
-          <span>🌸</span>
-          <span>{isSubmitting ? 'Sealing Masterpiece...' : 'CONFIRM OUR DATE ❤️'}</span>
-          <span>🌸</span>
+          <span>{isMasterAlchemist ? '👑' : '🌸'}</span>
+          <span>
+            {isSubmitting
+              ? isMasterAlchemist
+                ? 'Sealing Royal Keepsake...'
+                : 'Sealing Masterpiece...'
+              : isMasterAlchemist
+              ? 'CONFIRM ROYAL DATE 👑'
+              : 'CONFIRM OUR DATE ❤️'}
+          </span>
+          <span>{isMasterAlchemist ? '👑' : '🌸'}</span>
         </motion.button>
       </div>
     </motion.div>
