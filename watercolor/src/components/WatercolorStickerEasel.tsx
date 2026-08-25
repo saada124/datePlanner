@@ -48,6 +48,7 @@ export const WatercolorStickerEasel = forwardRef<
     { id: 'stk-init-2', emoji: '✨', label: 'Sparkles', x: 14, y: 84, rotation: -8, scale: 1.1 }
   ]);
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const [draggingStickerId, setDraggingStickerId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const boardRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,6 +82,56 @@ export const WatercolorStickerEasel = forwardRef<
     watercolorAudio.playWaterDrip();
     setStickers([]);
     setSelectedStickerId(null);
+  };
+
+  // High-precision pointer drag: 1:1 drop accuracy with zero jump
+  const handleStickerPointerDown = (e: React.PointerEvent<HTMLDivElement>, sticker: PlacedSticker) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!boardRef.current) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const initialStickerX = sticker.x;
+    const initialStickerY = sticker.y;
+    let hasMoved = false;
+
+    setDraggingStickerId(sticker.id);
+    setSelectedStickerId(sticker.id);
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      if (!boardRef.current) return;
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+
+      if (Math.hypot(dx, dy) > 3) {
+        hasMoved = true;
+      }
+
+      const rect = boardRef.current.getBoundingClientRect();
+      const deltaXPercent = (dx / rect.width) * 100;
+      const deltaYPercent = (dy / rect.height) * 100;
+
+      const nextX = Math.min(95, Math.max(5, initialStickerX + deltaXPercent));
+      const nextY = Math.min(95, Math.max(5, initialStickerY + deltaYPercent));
+
+      setStickers((prev) =>
+        prev.map((item) => (item.id === sticker.id ? { ...item, x: nextX, y: nextY } : item))
+      );
+    };
+
+    const onPointerUp = () => {
+      setDraggingStickerId(null);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+
+      if (hasMoved) {
+        watercolorAudio.playBrushStroke(0.4);
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
   };
 
   // High-resolution capture function that enables the Barcode strip only in the exported image
@@ -437,54 +488,48 @@ export const WatercolorStickerEasel = forwardRef<
           </motion.div>
         )}
 
-        {/* Freely Draggable Stamped Stickers Layer */}
+        {/* Freely Draggable Stamped Stickers Layer with Direct 1:1 Precision */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <AnimatePresence>
-            {stickers.map((s) => (
-              <motion.div
-                key={s.id}
-                drag
-                dragMomentum={false}
-                dragConstraints={boardRef}
-                onDragEnd={(_e, info) => {
-                  if (boardRef.current) {
-                    const rect = boardRef.current.getBoundingClientRect();
-                    const newX = Math.min(95, Math.max(5, ((info.point.x - rect.left) / rect.width) * 100));
-                    const newY = Math.min(95, Math.max(5, ((info.point.y - rect.top) / rect.height) * 100));
-                    setStickers((prev) =>
-                      prev.map((item) => (item.id === s.id ? { ...item, x: newX, y: newY } : item))
-                    );
-                  }
-                }}
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: s.scale, rotate: s.rotation }}
-                exit={{ scale: 0, opacity: 0 }}
-                style={{
-                  position: 'absolute',
-                  left: `${s.x}%`,
-                  top: `${s.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                className="pointer-events-auto cursor-grab active:cursor-grabbing group"
-                onClick={() => setSelectedStickerId(s.id)}
-              >
-                <div className="relative">
-                  <span className="text-3xl sm:text-4xl drop-shadow-md select-none block hover:scale-125 transition-transform">
-                    {s.emoji}
-                  </span>
-                  {selectedStickerId === s.id && (
-                    <button
-                      type="button"
-                      onClick={(e) => handleRemoveSticker(s.id, e)}
-                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center shadow-xs cursor-pointer export-exclude"
-                      title="Remove sticker"
+            {stickers.map((s) => {
+              const isDragging = draggingStickerId === s.id;
+              const isSelected = selectedStickerId === s.id;
+
+              return (
+                <div
+                  key={s.id}
+                  onPointerDown={(e) => handleStickerPointerDown(e, s)}
+                  style={{
+                    position: 'absolute',
+                    left: `${s.x}%`,
+                    top: `${s.y}%`,
+                    transform: `translate(-50%, -50%) rotate(${s.rotation}deg) scale(${s.scale * (isDragging ? 1.2 : 1)})`,
+                    touchAction: 'none'
+                  }}
+                  className="pointer-events-auto cursor-grab active:cursor-grabbing select-none group transition-transform duration-75"
+                >
+                  <div className="relative">
+                    <span
+                      className={`text-3xl sm:text-4xl drop-shadow-md select-none block transition-all ${
+                        isDragging ? 'scale-115 drop-shadow-lg' : 'hover:scale-115'
+                      }`}
                     >
-                      ×
-                    </button>
-                  )}
+                      {s.emoji}
+                    </span>
+                    {isSelected && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveSticker(s.id, e)}
+                        className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center shadow-xs cursor-pointer export-exclude"
+                        title="Remove sticker"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </motion.div>
-            ))}
+              );
+            })}
           </AnimatePresence>
         </div>
 
