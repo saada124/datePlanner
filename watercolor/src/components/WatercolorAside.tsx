@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PaletteMixer } from './PaletteMixer';
 import { WatercolorVoiceNote } from './WatercolorVoiceNote';
+import { CoupleQuizModal } from './CoupleQuizModal';
 import { watercolorAudio } from '../utils/watercolorAudio';
 
 interface WatercolorAsideProps {
@@ -15,6 +16,7 @@ export const WatercolorAside: React.FC<WatercolorAsideProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
 
   return (
     <>
@@ -64,7 +66,7 @@ export const WatercolorAside: React.FC<WatercolorAsideProps> = ({
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-4"
+                className="space-y-3.5"
               >
                 {/* 1. Mini-Game Quick Launch Banner */}
                 <motion.div
@@ -74,7 +76,7 @@ export const WatercolorAside: React.FC<WatercolorAsideProps> = ({
                     watercolorAudio.playFanfare();
                     onOpenStudio();
                   }}
-                  className="p-3 rounded-2xl bg-gradient-to-r from-storybook-blush via-white to-storybook-sageLight border border-storybook-rose/40 shadow-2xs flex items-center justify-between cursor-pointer group"
+                  className="p-2.5 rounded-2xl bg-gradient-to-r from-storybook-blush via-white to-storybook-sageLight border border-storybook-rose/40 shadow-2xs flex items-center justify-between cursor-pointer group"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xl group-hover:scale-125 transition-transform">🖌️</span>
@@ -93,12 +95,39 @@ export const WatercolorAside: React.FC<WatercolorAsideProps> = ({
                   </span>
                 </motion.div>
 
-                {/* 2. Interactive Palette Studio Mixer */}
+                {/* 2. Interactive Couple's Chemistry Quiz Banner */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    watercolorAudio.playFanfare();
+                    setIsQuizOpen(true);
+                  }}
+                  className="p-2.5 rounded-2xl bg-gradient-to-r from-purple-100 via-pink-50 to-amber-50 border border-purple-300 shadow-2xs flex items-center justify-between cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl group-hover:scale-125 transition-transform">🧩</span>
+                    <div>
+                      <div className="text-xs font-bold text-purple-950 flex items-center gap-1.5">
+                        <span>Couple's Chemistry Quiz</span>
+                        <span className="bg-purple-600 text-white text-[8px] px-1.5 py-0.2 rounded-full">FUN</span>
+                      </div>
+                      <div className="text-[10px] font-handwriting text-purple-700">
+                        Who loves who more? Play & test! ✨
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-purple-800 font-bold group-hover:translate-x-1 transition-transform">
+                    ➔
+                  </span>
+                </motion.div>
+
+                {/* 3. Interactive Palette Studio Mixer */}
                 <div>
                   <PaletteMixer onPaletteChange={onPaletteChange} />
                 </div>
 
-                {/* 3. Voice Note Audio Player */}
+                {/* 4. Voice Note Audio Player */}
                 <div>
                   <WatercolorVoiceNote />
                 </div>
@@ -139,43 +168,66 @@ export const WatercolorAside: React.FC<WatercolorAsideProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsMobileOpen(false)}
-                  className="w-7 h-7 rounded-full bg-storybook-bg text-storybook-ink flex items-center justify-center text-xs font-bold hover:bg-storybook-border cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-storybook-bg text-storybook-ink flex items-center justify-center text-sm font-bold hover:bg-storybook-border cursor-pointer transition-colors"
                 >
                   ✕
                 </button>
               </div>
 
               <div className="space-y-4">
-                {/* Mini-Game Launcher */}
+                {/* Mini-Game Quick Launch Banner */}
                 <div
                   onClick={() => {
                     setIsMobileOpen(false);
-                    watercolorAudio.playFanfare();
                     onOpenStudio();
                   }}
-                  className="p-3.5 rounded-2xl bg-gradient-to-r from-storybook-blush via-white to-storybook-sageLight border border-storybook-rose/40 shadow-xs flex items-center justify-between cursor-pointer"
+                  className="p-3 rounded-2xl bg-gradient-to-r from-storybook-blush to-white border border-storybook-rose/40 flex items-center justify-between cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">🖌️</span>
                     <div>
-                      <div className="text-xs font-bold text-storybook-ink">
-                        Play Painting Studio Mini-Game
-                      </div>
-                      <div className="text-[11px] font-handwriting text-storybook-roseDark">
-                        Stencils, watercolor brushes & stamps ✨
+                      <div className="text-xs font-bold text-storybook-ink">Painting Studio Mini-Game</div>
+                      <div className="text-[10px] font-handwriting text-storybook-roseDark">
+                        Paint custom canvases & stencils
                       </div>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-storybook-roseDark">Play ➔</span>
+                  <span className="text-xs font-bold text-storybook-roseDark">Play ➔</span>
                 </div>
 
+                {/* Couple's Chemistry Quiz Banner */}
+                <div
+                  onClick={() => {
+                    setIsMobileOpen(false);
+                    setIsQuizOpen(true);
+                  }}
+                  className="p-3 rounded-2xl bg-gradient-to-r from-purple-100 to-pink-50 border border-purple-300 flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">🧩</span>
+                    <div>
+                      <div className="text-xs font-bold text-purple-950">Couple's Chemistry Quiz</div>
+                      <div className="text-[10px] font-handwriting text-purple-700">
+                        Who loves who more? Play & test! ✨
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-purple-800">Play ➔</span>
+                </div>
+
+                {/* Palette Studio Mixer */}
                 <PaletteMixer onPaletteChange={onPaletteChange} />
+
+                {/* Voice Note Player */}
                 <WatercolorVoiceNote />
               </div>
             </motion.aside>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Couple's Chemistry Quiz Modal */}
+      <CoupleQuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </>
   );
 };

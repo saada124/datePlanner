@@ -178,5 +178,123 @@ export const APP_CONFIG = {
     `🍰 10/10: Even sweeter than our favorite dessert after dinner. 🥠😏`,
     `🌹 1000/10: A masterpiece worthy of its own romantic museum exhibition.`,
     `🏆 100/10: Approved unconditionally by ${NAMES.boyfriendName} with maximum boyfriend pride! ❤️`
-  ]
+  ],
+
+  // =========================================================================
+  // COUPLE'S CHEMISTRY QUIZ CONFIGURATION
+  // Easy to customize for any couple: questions, options & character reactions
+  // =========================================================================
+  coupleQuiz: {
+    modalTitle: "The Couple's Chemistry Quiz",
+    modalSubtitle: `Testing the romantic chemistry of ${NAMES.girlfriendName} & ${NAMES.boyfriendName} ✨`,
+    scorecardTitle: '100% Certified Soulmates ✨',
+    scorecardSubtitle: `Scientific results confirmed: ${NAMES.girlfriendName} is the undisputed queen, and ${NAMES.boyfriendName} is hopelessly in love forever.`,
+    scorecardMetrics: [
+      { label: '👑 Supreme Leader', value: NAMES.girlfriendName },
+      { label: '💖 Who Loves More', value: `${NAMES.boyfriendName} (Infinity + 1)` },
+      { label: '🌟 Couple Chemistry', value: 'Off the charts (1000/10)' }
+    ],
+    questions: [
+      {
+        id: 1,
+        title: 'Who takes longer to get ready for date night?',
+        emoji: '💄',
+        options: [
+          {
+            id: 'opt-1a',
+            character: 'girlfriend' as const,
+            emoji: '👑',
+            label: NAMES.girlfriendName,
+            sub: 'Perfection & royalty take time to prepare ✨',
+            verdictTitle: `Verdict from ${NAMES.boyfriendName} 💬`,
+            reaction: `And every single second of waiting is 1000% worth it when she walks out looking like a goddess. 💖`
+          },
+          {
+            id: 'opt-1b',
+            character: 'boyfriend' as const,
+            emoji: '👔',
+            label: NAMES.boyfriendName,
+            sub: 'Trying on 5 shirts just to wear the first one ⏳',
+            verdictTitle: `Verdict from ${NAMES.girlfriendName} 💬`,
+            reaction: `He just wants to look worthy of standing next to his queen! 😌`
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Who is secretly the supreme boss of this relationship?',
+        emoji: '👑',
+        options: [
+          {
+            id: 'opt-2a',
+            character: 'girlfriend' as const,
+            emoji: '👸',
+            label: `Queen ${NAMES.girlfriendName}`,
+            sub: 'Her word is the law of the universe 📜',
+            verdictTitle: 'Official Royal Decree 👑',
+            reaction: `Undisputed fact! All royal decrees are approved unconditionally by ${NAMES.boyfriendName}. 📜✨`
+          },
+          {
+            id: 'opt-2b',
+            character: 'boyfriend' as const,
+            emoji: '🫡',
+            label: NAMES.boyfriendName,
+            sub: 'Happily executing all royal orders',
+            verdictTitle: `Verdict from ${NAMES.boyfriendName} 💬`,
+            reaction: `Loyal bodyguard, chauffeur, and personal dessert chef at your service! 🍷`
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Who falls asleep first during cozy movie night?',
+        emoji: '😴',
+        options: [
+          {
+            id: 'opt-3a',
+            character: 'girlfriend' as const,
+            emoji: '🌙',
+            label: NAMES.girlfriendName,
+            sub: 'Asleep within 8 minutes of the intro 💤',
+            verdictTitle: `Verdict from ${NAMES.boyfriendName} 💬`,
+            reaction: `The cutest sleeping beauty in existence — his shoulder is her permanent pillow. 💤❤️`
+          },
+          {
+            id: 'opt-3b',
+            character: 'boyfriend' as const,
+            emoji: '🍿',
+            label: NAMES.boyfriendName,
+            sub: 'Left watching the movie credits alone in the dark',
+            verdictTitle: `Verdict from ${NAMES.girlfriendName} 💬`,
+            reaction: `He will keep the blanket warm until you wake up with a soft smile. ☕`
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: 'The Ultimate Showdown: Who loves the other more?',
+        emoji: '💖',
+        options: [
+          {
+            id: 'opt-4a',
+            character: 'girlfriend' as const,
+            emoji: '🌸',
+            label: NAMES.girlfriendName,
+            sub: 'I love him to the moon and back! 🚀',
+            verdictTitle: '⚠️ Romantic Supercomputer Alert',
+            reaction: `Cute answer, but ${NAMES.boyfriendName} loves you by infinity + 1! It is scientifically impossible to love him more than he loves you! 📈❤️`
+          },
+          {
+            id: 'opt-4b',
+            character: 'boyfriend' as const,
+            emoji: '🏆',
+            label: NAMES.boyfriendName,
+            sub: 'His love exceeds all laws of physics ✨',
+            verdictTitle: '✅ 1000% Verified Truth',
+            reaction: `Correct! ${NAMES.boyfriendName} has been completely, helplessly head-over-heels in love with you since day one. 💍✨`
+          }
+        ]
+      }
+    ]
+  }
 };
