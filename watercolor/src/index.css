@@ -7,12 +7,13 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #f2f7fb;
     background-image:
-      radial-gradient(rgba(201, 111, 138, 0.05) 1.5px, transparent 1.5px),
-      radial-gradient(rgba(159, 195, 184, 0.05) 1.5px, transparent 1.5px);
-    background-size: 34px 34px;
-    background-position: 0 0, 17px 17px;
+      radial-gradient(rgba(201, 111, 138, 0.08) 1.5px, transparent 1.5px),
+      radial-gradient(rgba(58, 134, 255, 0.06) 1.5px, transparent 1.5px);
+    background-size: 36px 36px;
+    background-position: 0 0, 18px 18px;
     min-height: 100vh;
     color: #3b4a63;
+    overflow-x: hidden;
   }
 }
 
@@ -22,44 +23,45 @@
   border: 1px solid #dfe6ee;
   box-shadow: 0 10px 30px -4px rgba(93, 116, 150, 0.16), 0 4px 12px -2px rgba(93, 116, 150, 0.08);
   position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.paper-card-rose {
-  background: linear-gradient(160deg, #fdfcff 0%, #fdeef2 100%);
-  border: 1px solid #f2d8e0;
-  box-shadow: 0 10px 30px -4px rgba(201, 111, 138, 0.14), 0 4px 12px -2px rgba(201, 111, 138, 0.07);
-}
-
+/* Deckle Edge Paper Texture */
 .paper-deckle {
   position: relative;
   background-color: #fdfcff;
+  border-radius: 1.25rem;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 12px 28px -6px rgba(93, 116, 150, 0.18),
+    inset 0 0 16px rgba(232, 160, 180, 0.06);
 }
 
-/* Watercolor Splash Strip (replaces washi tape) */
+/* Watercolor Splash Strip (Washi Tape) */
 .washi-tape {
   position: absolute;
-  height: 20px;
-  background: linear-gradient(90deg, rgba(201, 111, 138, 0.55), rgba(231, 199, 130, 0.5), rgba(159, 195, 184, 0.5));
+  height: 22px;
+  background: linear-gradient(90deg, rgba(232, 93, 117, 0.65), rgba(251, 133, 0, 0.55), rgba(58, 134, 255, 0.55));
   border-radius: 9999px;
   filter: blur(0.2px);
-  box-shadow: 0 1px 3px rgba(93, 116, 150, 0.1);
-  transform: rotate(-2deg);
+  box-shadow: 0 2px 5px rgba(93, 116, 150, 0.15);
+  transform: rotate(-2.5deg);
   z-index: 10;
 }
 
 .washi-tape-sage {
-  background: linear-gradient(90deg, rgba(159, 195, 184, 0.55), rgba(201, 111, 138, 0.5), rgba(201, 184, 232, 0.55));
-  transform: rotate(2deg);
+  background: linear-gradient(90deg, rgba(42, 157, 143, 0.65), rgba(232, 93, 117, 0.55), rgba(131, 56, 236, 0.6));
+  transform: rotate(2.5deg);
 }
 
-/* Watercolor Paint Splotch (replaces wax seal) */
+/* Watercolor Paint Splotch (Wax Seal) */
 .wax-seal {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 46% 54% 58% 42% / 48% 42% 58% 52%;
-  background: radial-gradient(circle at 35% 30%, #f3c6d4, #e8a0b4 55%, #c96f8a);
+  background: radial-gradient(circle at 35% 30%, #f7a8ba, #e85d75 55%, #c93b5a);
   border: none;
-  box-shadow: 0 4px 14px rgba(201, 111, 138, 0.35), inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(232, 93, 117, 0.42), inset 0 2px 6px rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,7 +70,7 @@
   font-weight: bold;
 }
 
-/* Custom handwriting font utility */
+/* Custom font utilities */
 .font-handwriting {
   font-family: 'Caveat', cursive;
 }
@@ -77,20 +79,47 @@
   font-family: 'Playfair Display', Georgia, serif;
 }
 
+/* Tactile Color-Dip Interactive Option Cards */
+.color-dip-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.color-dip-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 120%, rgba(232, 93, 117, 0.18), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.color-dip-card:hover::before {
+  opacity: 1;
+}
+
+.color-dip-card-active {
+  border-color: #e85d75 !important;
+  background: linear-gradient(145deg, #ffffff 0%, #fff0f3 100%) !important;
+  box-shadow: 0 8px 24px -4px rgba(232, 93, 117, 0.25), 0 2px 8px -2px rgba(232, 93, 117, 0.12) !important;
+  transform: translateY(-2px);
+}
+
 /* Soft Watercolor Buttons */
 .story-btn-primary {
-  background: linear-gradient(135deg, #e8a0b4 0%, #c9b8e8 130%);
+  background: linear-gradient(135deg, #e85d75 0%, #a855f7 100%);
   color: #ffffff;
   border-radius: 9999px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 600;
-  box-shadow: 0 4px 14px rgba(201, 111, 138, 0.35);
+  box-shadow: 0 4px 16px rgba(232, 93, 117, 0.4);
   transition: all 0.25s ease;
 }
 
 .story-btn-primary:hover {
-  background: linear-gradient(135deg, #d98ba1 0%, #b9a4dd 130%);
-  box-shadow: 0 6px 20px rgba(201, 111, 138, 0.45);
+  background: linear-gradient(135deg, #d84560 0%, #9333ea 100%);
+  box-shadow: 0 6px 22px rgba(232, 93, 117, 0.5);
   transform: translateY(-2px);
 }
 
@@ -105,7 +134,7 @@
   border-radius: 9999px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(93, 116, 150, 0.06);
+  box-shadow: 0 2px 8px rgba(93, 116, 150, 0.08);
   transition: all 0.25s ease;
 }
 
@@ -113,7 +142,7 @@
   background-color: #f6f9fc;
   border-color: #c4d1e0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(93, 116, 150, 0.08);
+  box-shadow: 0 4px 12px rgba(93, 116, 150, 0.12);
 }
 
 .story-btn-secondary:active {

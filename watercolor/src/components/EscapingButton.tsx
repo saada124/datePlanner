@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { APP_CONFIG } from '../config/appConfig';
-import { sound } from '../utils/soundEffects';
+import { watercolorAudio } from '../utils/watercolorAudio';
 
 interface EscapingButtonProps {
   onAttempt?: (count: number) => void;
@@ -17,8 +17,8 @@ interface WatercolorDroplet {
   rotation: number;
 }
 
-const PASTEL_COLORS = ['#e8a0b4', '#c9b8e8', '#9fc3b8', '#e7c782', '#f6c4c4', '#d1d5db'];
-const PETAL_SYMBOLS = ['🌸', '🍃', '✨', '💧', '🎨', '🌷', '🦋'];
+const VIBRANT_PIGMENT_COLORS = ['#e85d75', '#3a86ff', '#fb8500', '#2a9d8f', '#8338ec', '#f7b2c0'];
+const PETAL_SYMBOLS = ['🌸', '🎨', '✨', '💧', '🌷', '🦋', '🖌️'];
 
 export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => {
   const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -36,7 +36,7 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
     if (isCooldownRef.current) return;
     isCooldownRef.current = true;
 
-    sound.playFlutter();
+    watercolorAudio.playBrushStroke(1.2);
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate?.([15, 30]);
     }
@@ -47,33 +47,44 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
       const originX = rect.left + rect.width / 2;
       const originY = rect.top + rect.height / 2;
 
+      // Trigger global canvas paint splatter at escaping location
+      window.dispatchEvent(
+        new CustomEvent('trigger-watercolor-splash', {
+          detail: {
+            x: originX,
+            y: originY,
+            color: VIBRANT_PIGMENT_COLORS[Math.floor(Math.random() * VIBRANT_PIGMENT_COLORS.length)]
+          }
+        })
+      );
+
       // Spawn 3-4 soft watercolor bloom droplets
-      const newDroplets: WatercolorDroplet[] = Array.from({ length: 3 }).map((_, i) => ({
+      const newDroplets: WatercolorDroplet[] = Array.from({ length: 4 }).map((_, i) => ({
         id: Date.now() + Math.random() + i,
-        x: originX + (Math.random() - 0.5) * 40,
-        y: originY + (Math.random() - 0.5) * 30,
-        color: PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)],
-        size: 14 + Math.random() * 12,
+        x: originX + (Math.random() - 0.5) * 50,
+        y: originY + (Math.random() - 0.5) * 40,
+        color: VIBRANT_PIGMENT_COLORS[Math.floor(Math.random() * VIBRANT_PIGMENT_COLORS.length)],
+        size: 16 + Math.random() * 14,
         symbol: PETAL_SYMBOLS[Math.floor(Math.random() * PETAL_SYMBOLS.length)],
         rotation: (Math.random() - 0.5) * 60
       }));
 
-      setDroplets(prev => [...prev.slice(-6), ...newDroplets]);
+      setDroplets(prev => [...prev.slice(-8), ...newDroplets]);
     }
 
     setAttemptCount(prev => {
       const next = prev + 1;
       if (onAttempt) onAttempt(next);
 
-      if (next >= 4) {
+      if (next >= 3) {
         const miniComments = [
           'Too slow! 💨',
           'Painting in progress 🎨',
-          'Almost! 🌸',
-          'Destiny says no! ✨',
+          'Almost caught the brush! 🌸',
+          'Palette slipped away! 💦',
           'Obviously is over there! 👉'
         ];
-        setSpeechBubble(miniComments[(next - 4) % miniComments.length]);
+        setSpeechBubble(miniComments[(next - 3) % miniComments.length]);
       }
       return next;
     });
@@ -161,9 +172,9 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
             initial={{ opacity: 0.9, scale: 0.4, x: d.x, y: d.y }}
             animate={{
               opacity: 0,
-              scale: 1.5,
-              y: d.y - 35,
-              x: d.x + (Math.random() - 0.5) * 40,
+              scale: 1.6,
+              y: d.y - 38,
+              x: d.x + (Math.random() - 0.5) * 45,
               rotate: d.rotation
             }}
             exit={{ opacity: 0 }}
@@ -185,8 +196,8 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
         }}
         transition={{
           type: 'spring',
-          stiffness: 300,
-          damping: 20,
+          stiffness: 320,
+          damping: 22,
           mass: 0.55
         }}
         style={{ willChange: 'transform' }}
@@ -194,17 +205,17 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
       >
         {/* Playful Floating Speech Bubble */}
         <AnimatePresence>
-          {speechBubble && attemptCount >= 4 && (
+          {speechBubble && attemptCount >= 3 && (
             <motion.div
               key={`bubble-${attemptCount}`}
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
-              animate={{ opacity: 1, y: -28, scale: 1 }}
+              animate={{ opacity: 1, y: -30, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
               transition={{ duration: 0.25 }}
-              className="absolute left-1/2 -translate-x-1/2 -top-1 whitespace-nowrap bg-storybook-card/95 backdrop-blur-xs text-storybook-roseDark border border-storybook-rose/40 px-2.5 py-0.5 rounded-full text-[11px] font-handwriting shadow-sm pointer-events-none z-30"
+              className="absolute left-1/2 -translate-x-1/2 -top-1 whitespace-nowrap bg-white/95 backdrop-blur-xs text-storybook-roseDark border border-storybook-rose/40 px-3 py-0.5 rounded-full text-[11px] font-handwriting shadow-sm pointer-events-none z-30"
             >
               {speechBubble}
-              <div className="w-1.5 h-1.5 bg-storybook-card border-r border-b border-storybook-rose/40 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
+              <div className="w-1.5 h-1.5 bg-white border-r border-b border-storybook-rose/40 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -218,14 +229,14 @@ export const EscapingButton: React.FC<EscapingButtonProps> = ({ onAttempt }) => 
           onClick={handleInteraction}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.92 }}
-          className={`story-btn-secondary px-6 py-3.5 text-xs sm:text-sm font-serif-body rounded-full transition-all border shadow-sm cursor-not-allowed whitespace-nowrap flex items-center gap-1.5 ${
-            attemptCount >= 6
-              ? 'bg-storybook-blush/80 border-storybook-rose/50 text-storybook-roseDark'
-              : 'bg-white/80 border-storybook-border text-storybook-inkLight hover:border-storybook-rose/40'
+          className={`story-btn-secondary px-6 py-3.5 text-xs sm:text-sm font-sans rounded-full transition-all border shadow-sm cursor-not-allowed whitespace-nowrap flex items-center gap-1.5 ${
+            attemptCount >= 5
+              ? 'bg-storybook-blush/90 border-storybook-rose/60 text-storybook-roseDark font-semibold'
+              : 'bg-white/90 border-storybook-border text-storybook-inkLight hover:border-storybook-rose/40'
           }`}
         >
           <span>{currentText}</span>
-          {attemptCount >= 7 && (
+          {attemptCount >= 6 && (
             <motion.span
               animate={{ x: [0, 4, 0] }}
               transition={{ repeat: Infinity, duration: 0.8 }}

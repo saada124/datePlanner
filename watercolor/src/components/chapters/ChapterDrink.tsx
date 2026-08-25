@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { APP_CONFIG } from '../../config/appConfig';
-import { sound } from '../../utils/soundEffects';
+import { watercolorAudio } from '../../utils/watercolorAudio';
 
 interface ChapterDrinkProps {
   selectedDrink: string;
@@ -25,8 +25,19 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
   const [customVal, setCustomVal] = useState<string>(customDrink);
   const [showCustom, setShowCustom] = useState<boolean>(Boolean(customDrink));
 
-  const handleSelect = (item: typeof DRINKS[0]) => {
-    sound.playChime();
+  const handleSelect = (item: typeof DRINKS[0], e: React.MouseEvent) => {
+    watercolorAudio.playWaterDrip(1.25);
+    const rect = e.currentTarget.getBoundingClientRect();
+    window.dispatchEvent(
+      new CustomEvent('trigger-watercolor-splash', {
+        detail: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          color: 'rgba(232, 93, 117, 0.4)'
+        }
+      })
+    );
+
     setDrink(item.id);
     setShowCustom(false);
     onUpdate({ drink: item.id, customDrink: '' });
@@ -39,7 +50,7 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
   };
 
   const handleProceed = () => {
-    sound.playChapterComplete();
+    watercolorAudio.playChapterComplete();
     onNext();
   };
 
@@ -50,20 +61,22 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-xl mx-auto w-full px-3 pb-16"
+      className="max-w-xl mx-auto w-full px-3 pb-16 select-none"
     >
-      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative">
-        <div className="washi-tape washi-tape-sage -top-2 right-6 w-20" />
+      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative border border-storybook-border">
+        <div className="washi-tape washi-tape-sage -top-2 right-6 w-24" />
 
         <div className="text-center mb-6">
-          <span className="text-xs font-semibold tracking-widest text-storybook-rose uppercase font-sans">
-            CHAPTER IV
+          <span className="text-xs font-semibold tracking-widest text-storybook-roseDark uppercase font-sans flex items-center justify-center gap-1.5">
+            <span>🎨</span>
+            <span>CHAPTER IV</span>
+            <span>🎨</span>
           </span>
           <h2 className="font-serif-title text-xl sm:text-2xl text-storybook-ink mt-1">
-            What are we drinking? 🥤
+            What elixir shall we sip? 🥤
           </h2>
           <p className="font-handwriting text-base text-storybook-inkLight mt-1">
-            Choose our refreshment for the date
+            Choose our refreshment for our painted afternoon
           </p>
         </div>
 
@@ -72,40 +85,42 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
           {DRINKS.map((item) => {
             const isSelected = drink === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
                 type="button"
-                onClick={() => handleSelect(item)}
-                className={`p-3 rounded-xl border flex flex-col items-center justify-between min-h-[95px] text-center transition-all cursor-pointer ${
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => handleSelect(item, e)}
+                className={`p-3 rounded-xl border flex flex-col items-center justify-between min-h-[105px] text-center transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-storybook-blush border-storybook-rose shadow-md scale-102 ring-2 ring-storybook-rose/30'
-                    : 'bg-white border-storybook-border hover:border-storybook-rose/40'
+                    ? 'color-dip-card-active scale-102 ring-2 ring-storybook-rose/30'
+                    : 'bg-white border-storybook-border hover:border-storybook-rose/40 shadow-2xs'
                 }`}
               >
-                <span className="text-2xl sm:text-3xl my-1">{item.icon}</span>
+                <span className="text-3xl my-1">{item.icon}</span>
                 <span className="font-serif text-xs font-semibold text-storybook-ink leading-snug">
                   {item.label}
                 </span>
                 <span className="text-[10px] text-storybook-inkLight font-sans mt-0.5">
                   {item.note}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
         {/* Custom Drink Option */}
-        <div className="mt-4 border-t border-storybook-border pt-3">
+        <div className="mt-4 border-t border-storybook-border/60 pt-3">
           <button
             type="button"
             onClick={() => {
               setShowCustom(!showCustom);
               if (!showCustom) setDrink(customDrinkId);
             }}
-            className="text-xs font-serif text-storybook-roseDark hover:underline flex items-center gap-1.5 cursor-pointer"
+            className="text-xs font-serif text-storybook-roseDark hover:underline flex items-center gap-1.5 cursor-pointer font-medium"
           >
             <span>{showCustom ? '−' : '+'}</span>
-            <span>{showCustom ? 'Hide custom drink' : 'Prefer another drink in mind?'}</span>
+            <span>{showCustom ? 'Hide custom drink' : 'Prefer a special customized beverage in mind?'}</span>
           </button>
 
           {showCustom && (
@@ -118,8 +133,8 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
                 type="text"
                 value={customVal}
                 onChange={(e) => handleCustomChange(e.target.value)}
-                placeholder="e.g. Lavender Matcha, Mocktail, Hot Chocolate..."
-                className="w-full bg-white border border-storybook-border rounded-xl p-2.5 text-xs focus:outline-none focus:border-storybook-rose"
+                placeholder="e.g. Lavender Matcha, Sparkling Berry Mocktail, Iced Chai..."
+                className="w-full bg-white border border-storybook-border rounded-xl p-3 text-xs focus:outline-none focus:border-storybook-rose shadow-inner"
               />
             </motion.div>
           )}
@@ -130,8 +145,11 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
       <div className="flex justify-between items-center">
         <button
           type="button"
-          onClick={onPrev}
-          className="story-btn-secondary px-5 py-2.5 text-xs cursor-pointer"
+          onClick={() => {
+            watercolorAudio.playBrushStroke(0.8);
+            onPrev();
+          }}
+          className="story-btn-secondary px-5 py-2.5 text-xs cursor-pointer flex items-center gap-1"
         >
           <span>← Back</span>
         </button>
@@ -140,11 +158,11 @@ export const ChapterDrink: React.FC<ChapterDrinkProps> = ({
           type="button"
           disabled={!isValid}
           onClick={handleProceed}
-          className={`story-btn-primary px-6 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
+          className={`story-btn-primary px-7 py-3.5 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
             !isValid ? 'opacity-40 cursor-not-allowed' : ''
           }`}
         >
-          <span>Final Chapter ➔</span>
+          <span>Chapter V: The Warm Greeting ➔</span>
         </button>
       </div>
     </motion.div>

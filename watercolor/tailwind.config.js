@@ -41,7 +41,6 @@ export default {
         'float-slow': 'float 4s ease-in-out infinite',
         'pulse-gentle': 'pulseGentle 3s ease-in-out infinite',
         'disc-spin': 'discSpin 5s linear infinite',
-        'blob-drift': 'blobDrift 12s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -55,11 +54,6 @@ export default {
         discSpin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
-        },
-        blobDrift: {
-          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
-          '33%': { transform: 'translate(40px, -30px) scale(1.1)' },
-          '66%': { transform: 'translate(-30px, 25px) scale(0.95)' },
         },
       }
     },

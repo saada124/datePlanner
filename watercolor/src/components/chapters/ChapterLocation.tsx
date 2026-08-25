@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { APP_CONFIG } from '../../config/appConfig';
-import { sound } from '../../utils/soundEffects';
+import { watercolorAudio } from '../../utils/watercolorAudio';
 
 interface ChapterLocationProps {
   selectedLocation: string;
@@ -26,15 +26,26 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
   const [customVal, setCustomVal] = useState<string>(customLocation);
   const [isCustom, setIsCustom] = useState<boolean>(Boolean(customLocation) || location === customLocationId);
 
-  const handleSelect = (locId: string) => {
-    sound.playChime();
+  const handleSelect = (locId: string, e: React.MouseEvent) => {
+    watercolorAudio.playColorChord(3);
+    const rect = e.currentTarget.getBoundingClientRect();
+    window.dispatchEvent(
+      new CustomEvent('trigger-watercolor-splash', {
+        detail: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          color: 'rgba(42, 157, 143, 0.4)'
+        }
+      })
+    );
+
     setLocation(locId);
     setIsCustom(false);
     onUpdate({ location: locId, customLocation: '' });
   };
 
   const handleCustomToggle = () => {
-    sound.playChime();
+    watercolorAudio.playWaterDrip(1.1);
     const locId = customLocationId;
     setLocation(locId);
     setIsCustom(true);
@@ -47,7 +58,7 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
   };
 
   const handleProceed = () => {
-    sound.playChapterComplete();
+    watercolorAudio.playChapterComplete();
     onNext();
   };
 
@@ -58,20 +69,22 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-xl mx-auto w-full px-3 pb-16"
+      className="max-w-xl mx-auto w-full px-3 pb-16 select-none"
     >
-      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative">
-        <div className="washi-tape -top-2 left-6 w-20" />
+      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative border border-storybook-border">
+        <div className="washi-tape -top-2 left-6 w-24" />
 
         <div className="text-center mb-6">
-          <span className="text-xs font-semibold tracking-widest text-storybook-rose uppercase font-sans">
-            CHAPTER III
+          <span className="text-xs font-semibold tracking-widest text-storybook-roseDark uppercase font-sans flex items-center justify-center gap-1.5">
+            <span>🎨</span>
+            <span>CHAPTER III</span>
+            <span>🎨</span>
           </span>
           <h2 className="font-serif-title text-xl sm:text-2xl text-storybook-ink mt-1">
-            Where are you taking me? 🗺️
+            Where are we escaping to? 🗺️
           </h2>
           <p className="font-handwriting text-base text-storybook-inkLight mt-1">
-            Select a realm on our romantic explorer's map
+            Choose a secret destination for our painted date
           </p>
         </div>
 
@@ -80,37 +93,39 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
           {LOCATIONS.map((loc) => {
             const isSelected = location === loc.id;
             return (
-              <button
+              <motion.button
                 key={loc.id}
                 type="button"
-                onClick={() => handleSelect(loc.id)}
-                className={`p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer ${
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={(e) => handleSelect(loc.id, e)}
+                className={`p-3.5 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-storybook-blush border-storybook-rose text-storybook-roseDark shadow-md scale-102 ring-2 ring-storybook-rose/30'
-                    : 'bg-white border-storybook-border hover:border-storybook-rose/40 text-storybook-ink'
+                    ? 'color-dip-card-active scale-102 ring-2 ring-storybook-rose/30'
+                    : 'bg-white border-storybook-border hover:border-storybook-rose/40 text-storybook-ink shadow-2xs'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">{loc.icon}</span>
-                  <span className="font-serif text-xs font-semibold">{loc.label}</span>
+                  <span className="text-2xl">{loc.icon}</span>
+                  <span className="font-serif text-xs sm:text-sm font-semibold">{loc.label}</span>
                 </div>
-                <span className="text-[10px] font-handwriting text-storybook-roseDark bg-storybook-parchment px-2 py-0.5 rounded-full border border-storybook-border">
+                <span className="text-[10px] font-handwriting text-storybook-roseDark bg-storybook-blush px-2.5 py-0.5 rounded-full border border-storybook-rose/20">
                   {loc.tag}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
         {/* Custom Location Option */}
-        <div className="mt-3 border-t border-storybook-border pt-3">
+        <div className="mt-3 border-t border-storybook-border/60 pt-3">
           <button
             type="button"
             onClick={handleCustomToggle}
-            className={`w-full p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+            className={`w-full p-3 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
               isCustom
-                ? 'bg-storybook-sageLight/70 border-storybook-sage text-storybook-ink'
-                : 'bg-white border-storybook-border hover:border-storybook-sage/50 text-storybook-inkLight'
+                ? 'bg-storybook-sageLight/80 border-storybook-sage text-storybook-ink font-semibold'
+                : 'bg-white border-storybook-border hover:border-storybook-sage/60 text-storybook-inkLight'
             }`}
           >
             <span>📍</span>
@@ -128,7 +143,7 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
                 value={customVal}
                 onChange={(e) => handleCustomText(e.target.value)}
                 placeholder="Enter specific restaurant, café, beach, park, or secret spot..."
-                className="w-full bg-white border border-storybook-border rounded-xl p-2.5 text-xs focus:outline-none focus:border-storybook-rose"
+                className="w-full bg-white border border-storybook-border rounded-xl p-3 text-xs focus:outline-none focus:border-storybook-rose shadow-inner"
               />
             </motion.div>
           )}
@@ -139,8 +154,11 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
       <div className="flex justify-between items-center">
         <button
           type="button"
-          onClick={onPrev}
-          className="story-btn-secondary px-5 py-2.5 text-xs cursor-pointer"
+          onClick={() => {
+            watercolorAudio.playBrushStroke(0.8);
+            onPrev();
+          }}
+          className="story-btn-secondary px-5 py-2.5 text-xs cursor-pointer flex items-center gap-1"
         >
           <span>← Back</span>
         </button>
@@ -149,11 +167,11 @@ export const ChapterLocation: React.FC<ChapterLocationProps> = ({
           type="button"
           disabled={!isValid}
           onClick={handleProceed}
-          className={`story-btn-primary px-6 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
+          className={`story-btn-primary px-7 py-3.5 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
             !isValid ? 'opacity-40 cursor-not-allowed' : ''
           }`}
         >
-          <span>Chapter IV ➔</span>
+          <span>Chapter IV: The Elixir ➔</span>
         </button>
       </div>
     </motion.div>

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { APP_CONFIG } from '../config/appConfig';
-import { sound } from '../utils/soundEffects';
+import { watercolorAudio } from '../utils/watercolorAudio';
 import { Volume2, VolumeX, Play, Pause } from 'lucide-react';
 
 export const WatercolorVoiceNote: React.FC = () => {
@@ -56,14 +56,14 @@ export const WatercolorVoiceNote: React.FC = () => {
   };
 
   const toggle = () => {
-    sound.unlock();
+    watercolorAudio.unlock();
     const audio = audioRef.current;
 
     if (isPlaying) {
       if (audio && !usingFallbackSynth) {
         audio.pause();
       } else {
-        sound.stopAcousticMelody();
+        watercolorAudio.stopAcousticMelody();
       }
       setIsPlaying(false);
       return;
@@ -77,12 +77,12 @@ export const WatercolorVoiceNote: React.FC = () => {
         console.warn('Audio play error, falling back to acoustic melody:', err);
         setUsingFallbackSynth(true);
         setIsPlaying(true);
-        sound.playAcousticMelody();
+        watercolorAudio.playAcousticMelody();
       });
     } else {
       setUsingFallbackSynth(true);
       setIsPlaying(true);
-      sound.playAcousticMelody();
+      watercolorAudio.playAcousticMelody();
     }
   };
 

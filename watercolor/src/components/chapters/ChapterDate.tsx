@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { APP_CONFIG } from '../../config/appConfig';
-import { sound } from '../../utils/soundEffects';
+import { watercolorAudio } from '../../utils/watercolorAudio';
 
 interface ChapterDateProps {
   selectedDate: string;
@@ -28,8 +28,15 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
   const timeOptions = APP_CONFIG.timeSlots;
   const customTimeId = APP_CONFIG.customTimeId;
 
-  const handleSelectDate = (item: typeof APP_CONFIG.dateRange[0]) => {
-    sound.playChime();
+  const handleSelectDate = (item: typeof APP_CONFIG.dateRange[0], e: React.MouseEvent) => {
+    watercolorAudio.playWaterDrip(1.1);
+    const rect = e.currentTarget.getBoundingClientRect();
+    window.dispatchEvent(
+      new CustomEvent('trigger-watercolor-splash', {
+        detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, color: 'rgba(232, 93, 117, 0.4)' }
+      })
+    );
+
     setActiveDate(item.fullDate);
     setActiveIso(item.iso);
     onUpdate({
@@ -40,8 +47,15 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
     });
   };
 
-  const handleSelectTime = (timeId: string) => {
-    sound.playChime();
+  const handleSelectTime = (timeId: string, e: React.MouseEvent) => {
+    watercolorAudio.playColorChord(2);
+    const rect = e.currentTarget.getBoundingClientRect();
+    window.dispatchEvent(
+      new CustomEvent('trigger-watercolor-splash', {
+        detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, color: 'rgba(58, 134, 255, 0.4)' }
+      })
+    );
+
     setActiveTime(timeId);
     onUpdate({
       dayDate: activeDate,
@@ -62,7 +76,7 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
   };
 
   const handleProceed = () => {
-    sound.playChapterComplete();
+    watercolorAudio.playChapterComplete();
     onNext();
   };
 
@@ -73,14 +87,16 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
-      className="max-w-xl mx-auto w-full px-3 pb-16"
+      className="max-w-xl mx-auto w-full px-3 pb-16 select-none"
     >
-      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative">
-        <div className="washi-tape -top-2 left-6 w-20" />
+      <div className="paper-card p-6 sm:p-8 rounded-2xl shadow-paper-lg mb-6 relative border border-storybook-border">
+        <div className="washi-tape -top-2 left-6 w-24" />
 
         <div className="text-center mb-6">
-          <span className="text-xs font-semibold tracking-widest text-storybook-rose uppercase font-sans">
-            CHAPTER I
+          <span className="text-xs font-semibold tracking-widest text-storybook-roseDark uppercase font-sans flex items-center justify-center gap-1.5">
+            <span>🎨</span>
+            <span>CHAPTER I</span>
+            <span>🎨</span>
           </span>
           <h2 className="font-serif-title text-xl sm:text-2xl text-storybook-ink mt-1">
             When are you free? 📅
@@ -95,14 +111,16 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
           {APP_CONFIG.dateRange.map((item) => {
             const isSelected = activeDate === item.fullDate;
             return (
-              <button
+              <motion.button
                 key={item.iso}
                 type="button"
-                onClick={() => handleSelectDate(item)}
-                className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                whileHover={{ scale: 1.08, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => handleSelectDate(item, e)}
+                className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer relative ${
                   isSelected
-                    ? 'bg-storybook-blush border-storybook-rose text-storybook-roseDark shadow-md scale-105 ring-2 ring-storybook-rose/30'
-                    : 'bg-white border-storybook-border hover:border-storybook-rose/50 text-storybook-ink'
+                    ? 'color-dip-card-active scale-105'
+                    : 'bg-white border-storybook-border hover:border-storybook-rose/50 text-storybook-ink shadow-2xs'
                 }`}
               >
                 <span className="text-[10px] uppercase font-sans font-semibold opacity-60">
@@ -114,29 +132,32 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
                 <span className="text-xs">
                   {isSelected ? '🌸' : '🌿'}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
         {/* Time of Day Section */}
-        <div className="border-t border-storybook-border pt-5">
-          <h3 className="font-serif text-sm text-storybook-ink mb-3 text-center sm:text-left">
-            What time of day feels most romantic?
+        <div className="border-t border-storybook-border/60 pt-5">
+          <h3 className="font-serif text-sm text-storybook-ink mb-3 text-center sm:text-left flex items-center gap-2">
+            <span>⏰</span>
+            <span>What hour feels most magical?</span>
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {timeOptions.map((opt) => {
               const isSelected = activeTime === opt.id;
               return (
-                <button
+                <motion.button
                   key={opt.id}
                   type="button"
-                  onClick={() => handleSelectTime(opt.id)}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={(e) => handleSelectTime(opt.id, e)}
                   className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-storybook-sageLight/70 border-storybook-sage text-storybook-ink font-medium shadow-sm'
-                      : 'bg-white border-storybook-border hover:border-storybook-sage/50 text-storybook-ink'
+                      ? 'color-dip-card-active'
+                      : 'bg-white border-storybook-border hover:border-storybook-sage/60 text-storybook-ink shadow-2xs'
                   }`}
                 >
                   <span className="text-xl">{opt.icon}</span>
@@ -144,7 +165,7 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
                     <div className="text-xs font-semibold">{opt.label}</div>
                     <div className="text-[10px] text-storybook-inkLight">{opt.desc}</div>
                   </div>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -159,8 +180,8 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
                 type="text"
                 value={customTimeVal}
                 onChange={(e) => handleCustomTimeChange(e.target.value)}
-                placeholder="e.g. 7:00 PM for sunset walk"
-                className="w-full bg-white border border-storybook-border rounded-xl p-2.5 text-xs focus:outline-none focus:border-storybook-rose"
+                placeholder="e.g. 7:00 PM for golden sunset walk"
+                className="w-full bg-white border border-storybook-border rounded-xl p-3 text-xs focus:outline-none focus:border-storybook-rose shadow-inner"
               />
             </motion.div>
           )}
@@ -173,11 +194,11 @@ export const ChapterDate: React.FC<ChapterDateProps> = ({
           type="button"
           disabled={!isValid}
           onClick={handleProceed}
-          className={`story-btn-primary px-6 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
+          className={`story-btn-primary px-7 py-3.5 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer ${
             !isValid ? 'opacity-40 cursor-not-allowed' : ''
           }`}
         >
-          <span>Chapter II ➔</span>
+          <span>Chapter II: The Adventures ➔</span>
         </button>
       </div>
     </motion.div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { sound } from '../utils/soundEffects';
+import { watercolorAudio } from '../utils/watercolorAudio';
 
 interface SettingsModalProps {
   open: boolean;
@@ -31,16 +31,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleSave = () => {
     const trimmed = email.trim();
     if (!trimmed) {
-      sound.playFlutter();
+      watercolorAudio.playFlutter();
       setError('Please enter an email address.');
       return;
     }
     if (!isValidEmail(trimmed)) {
-      sound.playFlutter();
+      watercolorAudio.playFlutter();
       setError("That email doesn't look quite right. Try again!");
       return;
     }
-    sound.playChime();
+    watercolorAudio.playChime();
     onSave(trimmed);
   };
 
