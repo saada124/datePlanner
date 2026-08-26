@@ -15,7 +15,7 @@ export const MixtapeFinalCard: React.FC<MixtapeFinalCardProps> = ({
   onConfirm,
   onEdit
 }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   const formattedActivities = selection.activities.join(', ') +
     (selection.customActivity ? ` (+ "${selection.customActivity}")` : '');
@@ -34,150 +34,175 @@ export const MixtapeFinalCard: React.FC<MixtapeFinalCardProps> = ({
     ? `${selection.drink} (${selection.customDrink})`
     : selection.drink;
 
-  const handleConfirmDate = async () => {
-    setIsSubmitting(true);
-    sound.playCelebrationTune();
+  const handleRecordPress = () => {
+    if (isRecording) return;
+    setIsRecording(true);
+    sound.playButtonClunk();
+    sound.playMotorWhir();
+    sound.playRecordLock();
 
+    // 1.2s authentic recording sequence
     setTimeout(() => {
       onConfirm();
-    }, 400);
+    }, 1200);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="max-w-xl mx-auto w-full px-3 pb-16 text-center select-none"
+      exit={{ opacity: 0, scale: 0.96 }}
+      className="max-w-xl mx-auto w-full px-3 pb-12 text-center select-none"
     >
-      {/* Header Tag */}
-      <div className="inline-block bg-mixtape-blush text-mixtape-roseDark font-typewriter text-[10px] tracking-[0.25em] uppercase px-4 py-1.5 rounded-full border border-mixtape-rose mb-4">
-        📼 J-CARD · SIDE A TRACKLIST 📼
-      </div>
+      {/* Walkman Faceplate Housing the J-Card */}
+      <div className="walkman-faceplate p-4 sm:p-7 rounded-3xl relative overflow-hidden mb-6">
+        {/* Corner Screws */}
+        <div className="screw-fastener absolute left-3 top-3" />
+        <div className="screw-fastener absolute right-3 top-3" />
+        <div className="screw-fastener absolute left-3 bottom-3" />
+        <div className="screw-fastener absolute right-3 bottom-3" />
 
-      {/* Main Cassette J-Card */}
-      <div className="jcard-card p-6 sm:p-9 rounded-2xl shadow-paper-lg text-left relative overflow-hidden mb-6">
-        {/* Tape strips */}
-        <div className="tape-strip -top-2 left-10 w-24" />
-        <div className="tape-strip tape-strip-reverse -top-2 right-10 w-24" />
+        {/* Top Metallic Banner with REC indicator */}
+        <div className="flex items-center justify-between border-b border-[#44382f] pb-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                isRecording
+                  ? 'bg-red-500 animate-rec-pulse shadow-[0_0_12px_#ef4444]'
+                  : 'bg-red-900 border border-red-700/60'
+              }`}
+            />
+            <span
+              className={`text-[10px] font-mono tracking-[0.25em] uppercase font-bold ${
+                isRecording ? 'text-red-400' : 'text-[#a89888]'
+              }`}
+            >
+              {isRecording ? '● RECORDING IN PROGRESS...' : 'READY TO RECORD'}
+            </span>
+          </div>
 
-        {/* J-Card Header */}
-        <div className="border-b border-mixtape-border pb-4 mb-5">
-          <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono text-[#d4af37] tracking-widest font-semibold">
+            SIDE A · MASTER DUB
+          </span>
+        </div>
+
+        {/* J-Card Tracklist Card */}
+        <div className="mixtape-card p-5 sm:p-7 rounded-2xl relative text-left mb-6">
+          <div className="tape-strip -top-2 left-8 w-24" />
+          <div className="tape-strip tape-strip-reverse -top-2 right-8 w-24" />
+
+          {/* Header */}
+          <div className="border-b border-[#decbb2]/80 pb-3 mb-4 flex items-center justify-between">
             <div>
-              <span className="text-[10px] uppercase font-typewriter tracking-[0.3em] text-mixtape-rose">
-                {APP_CONFIG.websiteTitle.toUpperCase()} · SIDE A
+              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#c96f4a] font-bold">
+                J-CARD · MASTER TRACKLIST
               </span>
-              <h1 className="font-serif-title text-xl sm:text-2xl text-mixtape-coffee mt-0.5">
+              <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#2d221c] mt-0.5">
                 A Date with {APP_CONFIG.girlfriendName} 🎧
               </h1>
-              <p className="font-handwriting text-sm text-mixtape-coffeeLight">
-                Mixed, pressed, and ready to spin
-              </p>
             </div>
-            <div className="deck-reel w-10 h-10 rounded-full shrink-0 relative">
-              <div className="absolute inset-[18%] rounded-full bg-mixtape-parchment border border-mixtape-border" />
-              <div className="absolute inset-[42%] rounded-full bg-mixtape-border" />
+            <div className="w-10 h-10 rounded-full bg-[#f4ebd9] border-2 border-[#b5a388] flex items-center justify-center shrink-0 shadow-inner">
+              <div className="w-6 h-6 rounded-full bg-[#2b221b] animate-reel-spin flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-[#d85848]" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Tracklist Itinerary */}
-        <div className="space-y-3 bg-mixtape-cream p-4 rounded-xl border border-mixtape-border text-xs sm:text-sm font-sans">
-          <div className="flex items-start gap-2 border-b border-mixtape-border/60 pb-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ TRACK 1 · DATE
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {selection.dayDate}
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2 border-b border-mixtape-border/60 pb-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ TRACK 2 · TIME
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {fullTime}
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2 border-b border-mixtape-border/60 pb-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ TRACK 3 · PLACE
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {fullLocation}
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2 border-b border-mixtape-border/60 pb-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ TRACK 4 · VIBE
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {formattedActivities}
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2 border-b border-mixtape-border/60 pb-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ TRACK 5 · SIPS
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {fullDrink}
-            </span>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-              ♪ BONUS · GREETING
-            </span>
-            <span className="font-medium text-mixtape-coffee flex-1">
-              {formattedGreetings}
-            </span>
-          </div>
-
-          {selection.customNotes && (
-            <div className="flex items-start gap-2 border-t border-mixtape-border/60 pt-2 text-mixtape-coffeeLight">
-              <span className="font-typewriter text-[10px] tracking-widest text-mixtape-roseDark min-w-[85px] sm:min-w-[100px] pt-0.5">
-                ♪ LINER NOTE
+          {/* Tracklist Items */}
+          <div className="space-y-2.5 bg-[#f7f1e5]/80 p-3.5 rounded-xl border border-[#decbb2] text-xs sm:text-sm font-sans">
+            <div className="flex items-start gap-2 border-b border-[#decbb2]/60 pb-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ TRACK 1
               </span>
-              <span className="font-handwriting text-base text-mixtape-coffee flex-1">
-                "{selection.customNotes}"
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {selection.dayDate}
               </span>
             </div>
-          )}
+
+            <div className="flex items-start gap-2 border-b border-[#decbb2]/60 pb-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ TRACK 2
+              </span>
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {fullTime}
+              </span>
+            </div>
+
+            <div className="flex items-start gap-2 border-b border-[#decbb2]/60 pb-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ TRACK 3
+              </span>
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {fullLocation}
+              </span>
+            </div>
+
+            <div className="flex items-start gap-2 border-b border-[#decbb2]/60 pb-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ TRACK 4
+              </span>
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {formattedActivities}
+              </span>
+            </div>
+
+            <div className="flex items-start gap-2 border-b border-[#decbb2]/60 pb-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ TRACK 5
+              </span>
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {fullDrink}
+              </span>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                ♪ BONUS
+              </span>
+              <span className="font-medium text-[#2d221c] flex-1 font-serif">
+                {formattedGreetings}
+              </span>
+            </div>
+
+            {selection.customNotes && (
+              <div className="flex items-start gap-2 border-t border-[#decbb2]/60 pt-2 text-[#6d5a4e]">
+                <span className="font-mono text-[10px] tracking-wider text-[#c96f4a] font-bold min-w-[85px] sm:min-w-[100px] pt-0.5">
+                  ♪ LINER NOTE
+                </span>
+                <span className="font-handwriting text-base text-[#2d221c] flex-1 leading-snug">
+                  "{selection.customNotes}"
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 text-center font-handwriting text-base text-[#c96f4a]">
+            ~ Pressed with love · {APP_CONFIG.boyfriendInitial} ♥ {APP_CONFIG.girlfriendInitial} ~
+          </div>
         </div>
 
-        {/* J-Card Footer */}
-        <div className="mt-4 text-center font-handwriting text-base text-mixtape-roseDark">
-          ~ Pressed with love · {APP_CONFIG.boyfriendInitial} ♥ {APP_CONFIG.girlfriendInitial} ~
+        {/* Buttons Row */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          <button
+            type="button"
+            onClick={onEdit}
+            disabled={isRecording}
+            className="btn-transport px-5 py-3 rounded-xl text-xs sm:text-sm font-mono font-bold order-2 sm:order-1 cursor-pointer"
+          >
+            <span>✏️ EDIT TRACKS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleRecordPress}
+            disabled={isRecording}
+            className="btn-rec-heavy px-8 py-3.5 rounded-xl text-white font-serif font-bold text-sm sm:text-base order-1 sm:order-2 flex items-center gap-2.5 cursor-pointer shadow-xl"
+          >
+            <span>🔴</span>
+            <span>{isRecording ? 'PRESSING TAPE...' : 'PRESS RECORD ❤️'}</span>
+            <span>🎙️</span>
+          </button>
         </div>
-      </div>
-
-      {/* Confirm & Edit Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="mix-btn-secondary px-6 py-3 text-xs sm:text-sm order-2 sm:order-1 cursor-pointer"
-        >
-          <span>✏️ Edit Tracklist</span>
-        </button>
-
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          disabled={isSubmitting}
-          onClick={handleConfirmDate}
-          className="mix-btn-primary px-8 py-3.5 text-sm sm:text-base order-1 sm:order-2 flex items-center gap-2 cursor-pointer shadow-lg"
-        >
-          <span>🔴</span>
-          <span>{isSubmitting ? 'PRESSING RECORD...' : 'PRESS RECORD ❤️'}</span>
-          <span>🎙️</span>
-        </motion.button>
       </div>
     </motion.div>
   );

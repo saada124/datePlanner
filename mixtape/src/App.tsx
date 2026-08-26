@@ -5,6 +5,7 @@ import { MixtapeBackground } from './components/MixtapeBackground';
 import { SoundToggle } from './components/SoundToggle';
 import { CassetteDeck } from './components/CassetteDeck';
 import { MixtapeCover } from './components/MixtapeCover';
+import { TangledRibbonModal } from './components/TangledRibbonModal';
 import { TrackDate } from './components/tracks/TrackDate';
 import { TrackActivity } from './components/tracks/TrackActivity';
 import { TrackLocation } from './components/tracks/TrackLocation';
@@ -20,7 +21,7 @@ import { APP_CONFIG } from './config/appConfig';
 const INITIAL_SELECTION: DateSelection = {
   dayDate: '',
   isoDate: '',
-  timeSlot: APP_CONFIG.timeSlots[2].id,
+  timeSlot: APP_CONFIG.timeSlots[1]?.id || '',
   customTime: '',
   activities: [],
   customActivity: '',
@@ -42,7 +43,7 @@ const TRACK_STAGES: MixtapeStage[] = [
 
 const TRACK_TITLES: Record<string, string> = {
   TRACK_1_DATE: `${APP_CONFIG.dateRangeShortText} · The When 📅`,
-  TRACK_2_ACTIVITY: 'The Vibe · Our Adventures 🎸',
+  TRACK_2_ACTIVITY: 'The Vibe · Our Setlist 🎸',
   TRACK_3_LOCATION: 'The Scene · Where We Spin 🗺️',
   TRACK_4_DRINK: 'The Cheers · What We Sip ☕',
   TRACK_5_GREETING: 'The Sweet Spot · Hello 💫'
@@ -51,33 +52,21 @@ const TRACK_TITLES: Record<string, string> = {
 export function App() {
   const [stage, setStage] = useState<MixtapeStage>('COVER');
   const [selection, setSelection] = useState<DateSelection>(INITIAL_SELECTION);
-  const [email, setEmail] = useState<string>(() => localStorage.getItem('dateAppEmail') || '');
+  const [email, setEmail] = useState<string>(() => localStorage.getItem('dateAppEmail') || APP_CONFIG.prefillEmail || '');
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [pendingConfirm, setPendingConfirm] = useState<boolean>(false);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [canProceed, setCanProceed] = useState<boolean>(false);
-  const [soundPrompt, setSoundPrompt] = useState<boolean>(true);
+  const [isTangledModalOpen, setIsTangledModalOpen] = useState<boolean>(false);
 
-  // Start the lo-fi song + welcome chime as soon as audio is unlocked.
-  // Browsers block audio until the first user gesture, so we attempt on
-  // load and again on the very first tap/keypress anywhere.
   useEffect(() => {
     sound.playWelcome();
-
-    const timer = setTimeout(() => {
-      if (!sound.isReady()) {
-        setSoundPrompt(true);
-      } else {
-        setSoundPrompt(false);
-        sound.playSong();
-      }
-    }, 400);
+    sound.playSong();
 
     const onFirstGesture = () => {
       sound.unlock();
       sound.playWelcome();
       sound.playSong();
-      setSoundPrompt(false);
       window.removeEventListener('pointerdown', onFirstGesture);
       window.removeEventListener('keydown', onFirstGesture);
     };
@@ -85,7 +74,6 @@ export function App() {
     window.addEventListener('pointerdown', onFirstGesture);
     window.addEventListener('keydown', onFirstGesture);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener('pointerdown', onFirstGesture);
       window.removeEventListener('keydown', onFirstGesture);
     };
@@ -94,7 +82,7 @@ export function App() {
   const handleReset = () => {
     setSelection(INITIAL_SELECTION);
     setStage('COVER');
-    setIsPlaying(false);
+    setIsPlaying(true);
     setCanProceed(false);
   };
 
@@ -157,50 +145,51 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-between text-mixtape-coffee">
-      {/* Warm drifting blobs + floating notes canvas */}
+    <div className="min-h-screen relative flex flex-col justify-between text-[#ede3d8]">
       <MixtapeBackground />
+      <div className="analog-grain" />
 
-      {/* Film grain + light leaks (Vintage Analog) */}
-      <div className="film-grain" />
-      <div className="light-leak" />
-
-      {/* Header */}
-      <header className="relative z-30 px-4 py-3 sm:px-8 flex items-center justify-between border-b border-mixtape-border/80 bg-mixtape-bg/80 backdrop-blur-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🎧</span>
-          <span className="font-serif font-semibold text-sm text-mixtape-coffee">
-            {APP_CONFIG.websiteTitle}
-          </span>
-          <span className="hidden sm:inline text-xs font-handwriting text-mixtape-roseDark">
-            {APP_CONFIG.websiteTagline}
-          </span>
+      {/* Header Bar */}
+      <header className="relative z-30 px-4 py-3 sm:px-8 flex items-center justify-between border-b border-[#3d3229]/80 bg-[#161311]/85 backdrop-blur-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">🎧</span>
+          <div>
+            <span className="font-serif font-bold text-sm text-[#f4ebd9]">
+              {APP_CONFIG.websiteTitle}
+            </span>
+            <span className="hidden sm:inline-block ml-2 text-xs font-handwriting text-[#d4af37]">
+              {APP_CONFIG.websiteTagline}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="jcard-card px-3 py-1.5 rounded-full text-xs font-medium text-mixtape-coffee flex items-center gap-1.5 hover:border-mixtape-rose transition-colors cursor-pointer"
+            onClick={() => {
+              sound.playButtonClunk();
+              setSettingsOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2a221b] border border-[#5a483a] text-xs font-mono text-[#d4af37] hover:border-[#d4af37] transition-all cursor-pointer shadow-sm"
             title="Settings — set the email to receive the date results"
           >
             <span>⚙️</span>
-            <span className="hidden sm:inline font-handwriting text-sm">Settings</span>
+            <span className="hidden sm:inline font-mono text-[10px] font-bold">SETTINGS</span>
           </button>
           <SoundToggle />
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-6 sm:py-10 px-3 sm:px-4">
         <AnimatePresence mode="wait">
           {stage === 'COVER' && (
             <motion.div
               key="cover"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <MixtapeCover
@@ -219,7 +208,7 @@ export function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <CassetteDeck
@@ -230,18 +219,16 @@ export function App() {
                 trackTitle={TRACK_TITLES[stage]}
                 onNext={handleNext}
                 onPrev={handlePrev}
+                onManualRewind={() => handlePrev()}
               >
-                <AnimatePresence mode="wait">
-                  <TrackDate
-                    key="track1"
-                    selectedDate={selection.dayDate}
-                    selectedIso={selection.isoDate}
-                    selectedTime={selection.timeSlot}
-                    customTime={selection.customTime || ''}
-                    onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
-                    onValidityChange={setCanProceed}
-                  />
-                </AnimatePresence>
+                <TrackDate
+                  selectedDate={selection.dayDate}
+                  selectedIso={selection.isoDate}
+                  selectedTime={selection.timeSlot}
+                  customTime={selection.customTime || ''}
+                  onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
+                  onValidityChange={setCanProceed}
+                />
               </CassetteDeck>
             </motion.div>
           )}
@@ -252,7 +239,7 @@ export function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <CassetteDeck
@@ -263,16 +250,14 @@ export function App() {
                 trackTitle={TRACK_TITLES[stage]}
                 onNext={handleNext}
                 onPrev={handlePrev}
+                onManualRewind={() => handlePrev()}
               >
-                <AnimatePresence mode="wait">
-                  <TrackActivity
-                    key="track2"
-                    selectedActivities={selection.activities}
-                    customActivity={selection.customActivity || ''}
-                    onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
-                    onValidityChange={setCanProceed}
-                  />
-                </AnimatePresence>
+                <TrackActivity
+                  selectedActivities={selection.activities}
+                  customActivity={selection.customActivity || ''}
+                  onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
+                  onValidityChange={setCanProceed}
+                />
               </CassetteDeck>
             </motion.div>
           )}
@@ -283,7 +268,7 @@ export function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <CassetteDeck
@@ -294,16 +279,14 @@ export function App() {
                 trackTitle={TRACK_TITLES[stage]}
                 onNext={handleNext}
                 onPrev={handlePrev}
+                onManualRewind={() => handlePrev()}
               >
-                <AnimatePresence mode="wait">
-                  <TrackLocation
-                    key="track3"
-                    selectedLocation={selection.location}
-                    customLocation={selection.customLocation || ''}
-                    onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
-                    onValidityChange={setCanProceed}
-                  />
-                </AnimatePresence>
+                <TrackLocation
+                  selectedLocation={selection.location}
+                  customLocation={selection.customLocation || ''}
+                  onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
+                  onValidityChange={setCanProceed}
+                />
               </CassetteDeck>
             </motion.div>
           )}
@@ -314,7 +297,7 @@ export function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <CassetteDeck
@@ -325,16 +308,14 @@ export function App() {
                 trackTitle={TRACK_TITLES[stage]}
                 onNext={handleNext}
                 onPrev={handlePrev}
+                onManualRewind={() => handlePrev()}
               >
-                <AnimatePresence mode="wait">
-                  <TrackDrink
-                    key="track4"
-                    selectedDrink={selection.drink}
-                    customDrink={selection.customDrink || ''}
-                    onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
-                    onValidityChange={setCanProceed}
-                  />
-                </AnimatePresence>
+                <TrackDrink
+                  selectedDrink={selection.drink}
+                  customDrink={selection.customDrink || ''}
+                  onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
+                  onValidityChange={setCanProceed}
+                />
               </CassetteDeck>
             </motion.div>
           )}
@@ -345,7 +326,7 @@ export function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <CassetteDeck
@@ -356,16 +337,14 @@ export function App() {
                 trackTitle={TRACK_TITLES[stage]}
                 onNext={handleNext}
                 onPrev={handlePrev}
+                onManualRewind={() => handlePrev()}
               >
-                <AnimatePresence mode="wait">
-                  <TrackGreeting
-                    key="track5"
-                    selectedGreetings={selection.greetings}
-                    customNotes={selection.customNotes || ''}
-                    onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
-                    onValidityChange={setCanProceed}
-                  />
-                </AnimatePresence>
+                <TrackGreeting
+                  selectedGreetings={selection.greetings}
+                  customNotes={selection.customNotes || ''}
+                  onUpdate={(data) => setSelection(prev => ({ ...prev, ...data }))}
+                  onValidityChange={setCanProceed}
+                />
               </CassetteDeck>
             </motion.div>
           )}
@@ -373,19 +352,16 @@ export function App() {
           {stage === 'J_CARD' && (
             <motion.div
               key="jcard"
-              initial={{ opacity: 0, scale: 0.92, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <MixtapeFinalCard
                 selection={selection}
                 onConfirm={handleFinalConfirm}
-                onEdit={() => {
-                  setCanProceed(false);
-                  setStage('TRACK_1_DATE');
-                }}
+                onEdit={() => goToTrack(1)}
               />
             </motion.div>
           )}
@@ -393,10 +369,10 @@ export function App() {
           {stage === 'RECORDED' && (
             <motion.div
               key="recorded"
-              initial={{ opacity: 0, scale: 0.92, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <MixtapeCelebration
@@ -408,42 +384,28 @@ export function App() {
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-3 text-center text-xs font-handwriting text-mixtape-coffeeLight">
-        Pressed with all my love for {APP_CONFIG.girlfriendName} 🎧
-      </footer>
-
-      {/* Email Settings Modal */}
-      <SettingsModal
-        open={settingsOpen}
-        initialEmail={email || APP_CONFIG.prefillEmail}
-        onSave={handleSaveEmail}
-        onClose={() => setSettingsOpen(false)}
+      {/* Tangled Ribbon Rescue Mini-Game Modal */}
+      <TangledRibbonModal
+        isOpen={isTangledModalOpen}
+        onResolved={() => setIsTangledModalOpen(false)}
       />
 
-      {/* One-time sound enable prompt (autoplay is blocked until the first tap) */}
-      <AnimatePresence>
-        {soundPrompt && (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3 }}
-            onClick={() => {
-              sound.unlock();
-              sound.playWelcome();
-              sound.playSong();
-              setSoundPrompt(false);
-            }}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 jcard-card px-4 py-2.5 rounded-full text-xs font-medium text-mixtape-coffee flex items-center gap-2 shadow-lg cursor-pointer"
-            title="Enable sound"
-          >
-            <span className="animate-heart-beat inline-block">🔊</span>
-            <span className="font-handwriting text-sm">Tap anywhere to turn the sound on</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Settings Modal */}
+      {settingsOpen && (
+        <SettingsModal
+          currentEmail={email}
+          onSave={handleSaveEmail}
+          onClose={() => {
+            setSettingsOpen(false);
+            setPendingConfirm(false);
+          }}
+        />
+      )}
+
+      {/* Footer */}
+      <footer className="relative z-20 py-3 text-center text-[10px] font-mono text-[#8a7568] border-t border-[#3d3229]/60 bg-[#161311]/90">
+        <span>HI-FI CASSETTE RECORDER · PRESSED WITH LOVE · {APP_CONFIG.boyfriendInitial} ♥ {APP_CONFIG.girlfriendInitial}</span>
+      </footer>
     </div>
   );
 }

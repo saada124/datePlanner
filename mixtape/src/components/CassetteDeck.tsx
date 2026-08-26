@@ -1,6 +1,14 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { sound } from '../utils/soundEffects';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { VUMeter } from './VUMeter';
+import { TapeReels } from './TapeReels';
+import { MechanicalCounter } from './MechanicalCounter';
+import { GraphicEqualizer } from './GraphicEqualizer';
+import { MoodTapeRack } from './MoodTapeRack';
+import { ShellSwitcher } from './ShellSwitcher';
+import { DoodleCanvas } from './DoodleCanvas';
+import { TrackSideB } from './tracks/TrackSideB';
+import { sound, ShellEditionId, LabelStyleId, MoodTapeId } from '../utils/soundEffects';
 
 interface CassetteDeckProps {
   currentTrack: number;
@@ -10,6 +18,7 @@ interface CassetteDeckProps {
   trackTitle: string;
   onNext: () => void;
   onPrev: () => void;
+  onManualRewind?: (stepBack: boolean) => void;
   children: React.ReactNode;
 }
 
@@ -21,139 +30,259 @@ export const CassetteDeck: React.FC<CassetteDeckProps> = ({
   trackTitle,
   onNext,
   onPrev,
+  onManualRewind,
   children
 }) => {
+  const [isEjected, setIsEjected] = useState<boolean>(false);
+  const [isFlippedB, setIsFlippedB] = useState<boolean>(false);
+  const [showDoodle, setShowDoodle] = useState<boolean>(false);
+  const [doodleData, setDoodleData] = useState<string>(() => localStorage.getItem('mixtape_doodle') || '');
+  const [shellEdition, setShellEdition] = useState<ShellEditionId>(() => (localStorage.getItem('mixtape_shell') as ShellEditionId) || 'titanium');
+  const [labelStyle, setLabelStyle] = useState<LabelStyleId>('rainbow');
+  const [activeMoodTape, setActiveMoodTape] = useState<MoodTapeId>(() => sound.getActiveMoodTape());
+
+  const handleEjectToggle = () => {
+    sound.playEjectSound();
+    setIsEjected(!isEjected);
+  };
+
+  const handleFlipSide = () => {
+    sound.playButtonClunk();
+    setIsFlippedB(!isFlippedB);
+  };
+
+  const handleSelectShell = (shell: ShellEditionId) => {
+    setShellEdition(shell);
+    localStorage.setItem('mixtape_shell', shell);
+  };
+
+  const handleSaveDoodle = (dataUrl: string) => {
+    setDoodleData(dataUrl);
+    localStorage.setItem('mixtape_doodle', dataUrl);
+  };
+
+  const handleSelectMoodTape = (tapeId: MoodTapeId) => {
+    setActiveMoodTape(tapeId);
+    sound.setMoodTape(tapeId);
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24, scale: 0.97 }}
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', damping: 22, stiffness: 190 }}
-      className="w-full max-w-2xl mx-auto select-none"
+      transition={{ type: 'spring', damping: 24, stiffness: 200 }}
+      className={`w-full max-w-2xl mx-auto select-none shell-${shellEdition}`}
     >
-      {/* Top edge: write-protect tabs + screws */}
-      <div className="relative h-8 flex items-start justify-between px-10 sm:px-16">
-        <div className="flex gap-2">
-          <div className="cassette-tab" />
-          <div className="cassette-tab" />
-        </div>
-        <div className="cassette-screw mt-1.5" />
-        <div className="flex gap-2">
-          <div className="cassette-tab" />
-          <div className="cassette-tab" />
-        </div>
-      </div>
+      {/* Walkman Player Faceplate */}
+      <div className="walkman-faceplate p-3.5 sm:p-6 pb-6 relative overflow-hidden">
+        {/* 4 Corner Screws */}
+        <div className="screw-fastener absolute left-3 top-3" />
+        <div className="screw-fastener absolute right-3 top-3" />
+        <div className="screw-fastener absolute left-3 bottom-3" />
+        <div className="screw-fastener absolute right-3 bottom-3" />
 
-      {/* Cassette shell */}
-      <div className="cassette-shell rounded-t-none rounded-b-[26px] px-4 sm:px-8 pb-6 pt-2 relative">
-        {/* corner screws */}
-        <div className="cassette-screw absolute left-3 top-3" />
-        <div className="cassette-screw absolute right-3 top-3" />
-
-        {/* Tape window */}
-        <div className="cassette-window rounded-xl px-5 py-4 flex items-center justify-between gap-3 relative overflow-hidden">
-          <span className="absolute left-3 top-2 text-[9px] font-typewriter text-[#d8c9b2] tracking-[0.3em]">
-            SIDE A
-          </span>
-          <span className="absolute right-3 top-2 text-[9px] font-typewriter text-[#d8c9b2] tracking-[0.3em]">
-            {isPlaying ? '▶ PLAYING' : '■ STOP'}
-          </span>
-
-          <div className={`deck-reel w-14 h-14 sm:w-16 sm:h-16 rounded-full relative shrink-0 ${isPlaying ? 'animate-reel-spin' : ''}`}>
-            <div className="absolute inset-[16%] rounded-full bg-[#3a3027] border border-[#b3a17e]" />
-            <div className="absolute inset-[40%] rounded-full bg-[#b3a17e]" />
+        {/* Top Meter Bridge: VU Meters + Counter + EJECT button */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 mb-4 px-2 pt-1 border-b border-[#44382f] pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+            <span className="text-[10px] font-mono tracking-[0.25em] text-[#d4af37] uppercase font-bold">
+              HI-FI STEREO WALKMAN
+            </span>
           </div>
 
-          <div className="flex-1 flex flex-col items-center gap-1 px-1">
-            <div className="tape-path-line w-full h-1 rounded-full" />
-            <div className="text-center">
-              <div className="font-typewriter text-lg sm:text-xl text-[#e8dcc6]">
-                {String(currentTrack).padStart(2, '0')}
-                <span className="text-[#a99c85]"> / {String(totalTracks).padStart(2, '0')}</span>
-              </div>
-              <div className="text-[9px] font-typewriter text-[#a99c85] tracking-widest mt-0.5">
-                TRACK COUNTER
-              </div>
-            </div>
-            <div className="tape-path-line w-full h-1 rounded-full" />
+          <div className="w-full sm:w-auto flex-1 max-w-xs">
+            <VUMeter isPlaying={isPlaying && !isEjected} />
           </div>
 
-          <div className={`deck-reel w-14 h-14 sm:w-16 sm:h-16 rounded-full relative shrink-0 ${isPlaying ? 'animate-reel-spin-slow' : ''}`}>
-            <div className="absolute inset-[16%] rounded-full bg-[#3a3027] border border-[#b3a17e]" />
-            <div className="absolute inset-[40%] rounded-full bg-[#b3a17e]" />
-          </div>
-        </div>
-
-        {/* Label panel: the form lives here */}
-        <div className="label-panel rounded-xl mt-4 px-4 sm:px-6 pt-5 pb-4 relative">
-          {/* Track header */}
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-mixtape-roseDark text-sm shrink-0">♪</span>
-              <div className="min-w-0">
-                <div className="font-typewriter text-[10px] tracking-[0.25em] text-mixtape-roseDark uppercase">
-                  Track {currentTrack} of {totalTracks}
-                </div>
-                <h2 className="font-serif-title text-base sm:text-lg text-mixtape-coffee truncate">
-                  {trackTitle}
-                </h2>
-              </div>
-            </div>
-            {/* Track dots */}
-            <div className="flex gap-1.5 shrink-0">
-              {Array.from({ length: totalTracks }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    i < currentTrack ? 'bg-mixtape-terracotta' : 'bg-mixtape-border'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* The form */}
-          <div className="min-h-[260px]">{children}</div>
-
-          {/* Transport row */}
-          <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-mixtape-border/70">
+          <div className="flex items-center gap-2">
+            <MechanicalCounter currentTrack={currentTrack} />
+            {/* EJECT Button */}
             <button
               type="button"
-              onClick={() => {
-                sound.playPageTurn();
-                onPrev();
-              }}
-              disabled={currentTrack <= 1}
-              title="Rewind (previous track)"
-              aria-label="Rewind (previous track)"
-              className={`mix-btn-secondary w-11 h-11 rounded-full flex items-center justify-center text-sm cursor-pointer ${
-                currentTrack <= 1 ? 'opacity-40 cursor-not-allowed' : ''
+              onClick={handleEjectToggle}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-bold flex items-center gap-1 cursor-pointer transition-all ${
+                isEjected
+                  ? 'bg-[#c96f4a] border-[#e0a458] text-white shadow-md'
+                  : 'bg-[#2a221b] border-[#5a483a] text-[#d4af37] hover:border-[#d4af37]'
               }`}
+              title="Eject / Open Cassette Carriage Tray"
             >
-              ⏮
+              <span>⏏</span>
+              <span className="hidden sm:inline">EJECT</span>
             </button>
+          </div>
+        </div>
 
-            <div className="text-center">
-              <div className="font-handwriting text-sm text-mixtape-coffeeLight">
-                {canProceed ? 'ready to roll...' : 'pick your track details ♪'}
+        {/* Spring-Loaded 3D EJECT Carriage Tray */}
+        <div className="eject-carriage-wrapper mb-4">
+          <div className={`eject-carriage-door ${isEjected ? 'open' : ''}`}>
+            {/* Tape Well housing spools & dynamic ribbon */}
+            <div className="tape-well p-2.5 sm:p-3.5 relative overflow-hidden rounded-2xl">
+              <div className="acrylic-glare absolute inset-0 z-20 pointer-events-none" />
+              <TapeReels
+                currentTrack={currentTrack}
+                totalTracks={totalTracks}
+                isPlaying={isPlaying && !isEjected}
+                shellEdition={shellEdition}
+                onManualRewind={onManualRewind}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* EJECT OPEN DRAWER: Shell Switcher + Graphic EQ + Mood Tapes */}
+        <AnimatePresence>
+          {isEjected && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-3 mb-4 overflow-hidden"
+            >
+              <ShellSwitcher
+                currentShell={shellEdition}
+                currentLabel={labelStyle}
+                onSelectShell={handleSelectShell}
+                onSelectLabel={setLabelStyle}
+              />
+              <GraphicEqualizer />
+              <MoodTapeRack
+                activeTape={activeMoodTape}
+                onSelectTape={handleSelectMoodTape}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 3D Cassette Card Container (Side A ⇄ Side B Flip) */}
+        <div className="cassette-flip-container">
+          <div className={`cassette-flip-inner ${isFlippedB ? 'is-flipped' : ''}`}>
+            {/* --- SIDE A: DATE TRACK FORMS --- */}
+            <div className="cassette-flip-front mixtape-card p-4 sm:p-6 relative rounded-2xl">
+              <div className="tape-strip -top-2 left-6 w-20" />
+              <div className="tape-strip tape-strip-reverse -top-2 right-6 w-20" />
+
+              {/* Track Header & Side B Flip Switch */}
+              <div className="flex items-center justify-between gap-3 border-b border-[#decbb2]/80 pb-3 mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[#c96f4a] text-sm shrink-0">♪</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <div className="micro-led active-amber" />
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#8a7568]">
+                        TRACK {currentTrack} OF {totalTracks} · SIDE A
+                      </span>
+                    </div>
+                    <h2 className="font-serif text-base sm:text-lg font-bold text-[#2d221c] truncate">
+                      {trackTitle}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* Pen Doodle Tool Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowDoodle(!showDoodle)}
+                    className="p-1.5 rounded-lg bg-[#f7f1e5] hover:bg-[#ebdcc7] border border-[#decbb2] text-xs cursor-pointer"
+                    title="Doodle or sign on the tape sticker"
+                  >
+                    <span>✍️</span>
+                  </button>
+
+                  {/* Flip to Side B Button */}
+                  <button
+                    type="button"
+                    onClick={handleFlipSide}
+                    className="px-2.5 py-1 rounded-lg bg-[#f7f1e5] hover:bg-[#ebdcc7] border border-[#decbb2] text-[10px] font-mono font-bold text-[#2d221c] flex items-center gap-1 cursor-pointer"
+                    title="Flip Cassette to Side B (Secret Acoustic Extras)"
+                  >
+                    <span>🔄</span>
+                    <span className="hidden sm:inline">SIDE B</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Doodle Canvas Drawer */}
+              {showDoodle && (
+                <div className="mb-4">
+                  <DoodleCanvas
+                    initialDoodle={doodleData}
+                    onSaveDoodle={handleSaveDoodle}
+                    onClose={() => setShowDoodle(false)}
+                  />
+                </div>
+              )}
+
+              {/* Saved Doodle Stamped on Label if exists */}
+              {doodleData && !showDoodle && (
+                <div className="mb-3 p-1 bg-white/60 rounded-lg border border-dashed border-[#c96f4a]/50 flex items-center justify-between">
+                  <img src={doodleData} alt="Handwritten Doodle" className="h-8 max-w-[200px] object-contain" />
+                  <button
+                    type="button"
+                    onClick={() => setShowDoodle(true)}
+                    className="text-[9px] font-mono text-[#c96f4a] font-bold underline px-2 cursor-pointer"
+                  >
+                    Edit Doodle
+                  </button>
+                </div>
+              )}
+
+              {/* Track Selection Form Cards */}
+              <div className="min-h-[260px] py-1">{children}</div>
+
+              {/* Physical Transport Deck Controls */}
+              <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-[#decbb2]/80">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playButtonClunk();
+                    onPrev();
+                  }}
+                  disabled={currentTrack <= 1}
+                  title="Rewind (Previous Track)"
+                  aria-label="Rewind (Previous Track)"
+                  className={`btn-transport px-4 py-2.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
+                    currentTrack <= 1 ? 'opacity-40 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <span>⏮</span>
+                  <span className="hidden sm:inline">REW</span>
+                </button>
+
+                <div className="text-center px-2">
+                  <span className="font-handwriting text-sm sm:text-base text-[#6d5a4e]">
+                    {canProceed ? 'ready to roll to next track...' : 'pick track options ♪'}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!canProceed) return;
+                    sound.playMotorWhir();
+                    sound.playChapterComplete();
+                    onNext();
+                  }}
+                  disabled={!canProceed}
+                  title="Fast-Forward to Next Track"
+                  aria-label="Fast-Forward to Next Track"
+                  className={`btn-transport-primary px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer ${
+                    !canProceed ? 'opacity-40 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <span>{currentTrack === totalTracks ? 'FINALIZE MIX' : 'NEXT TRACK'}</span>
+                  <span>⏭</span>
+                </button>
               </div>
             </div>
 
-            <motion.button
-              type="button"
-              whileHover={canProceed ? { scale: 1.05 } : {}}
-              whileTap={canProceed ? { scale: 0.95 } : {}}
-              onClick={() => {
-                if (!canProceed) return;
-                sound.playChapterComplete();
-                onNext();
-              }}
-              disabled={!canProceed}
-              className={`mix-btn-primary px-5 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 rounded-full cursor-pointer ${
-                !canProceed ? 'opacity-40 cursor-not-allowed' : ''
-              }`}
-            >
-              <span>▶ NEXT TRACK</span>
-            </motion.button>
+            {/* --- SIDE B: UNRELEASED ACOUSTIC EXTRAS --- */}
+            <div className="cassette-flip-back mixtape-card p-4 sm:p-6 relative rounded-2xl">
+              <div className="tape-strip -top-2 left-6 w-20" />
+              <div className="tape-strip tape-strip-reverse -top-2 right-6 w-20" />
+              <TrackSideB onFlipBack={handleFlipSide} />
+            </div>
           </div>
         </div>
       </div>

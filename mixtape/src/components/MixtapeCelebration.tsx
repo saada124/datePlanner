@@ -28,33 +28,24 @@ export const MixtapeCelebration: React.FC<MixtapeCelebrationProps> = ({
   }, []);
 
   useEffect(() => {
-    // Gentle multi-stage cassette-styled confetti shower
-    const end = Date.now() + 4 * 1000;
-    const colors = ['#c96f4a', '#e0a458', '#b45f6f', '#d88a8a', '#f9e8dd', '#d9a441'];
+    const end = Date.now() + 3.5 * 1000;
+    const colors = ['#c96f4a', '#e0a458', '#b45f6f', '#d4af37', '#f9e8dd'];
 
     const frame = () => {
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 60,
-        spread: 65,
-        origin: { x: 0.05, y: 0.65 },
+        spread: 60,
+        origin: { x: 0.05, y: 0.6 },
         colors
       });
       confetti({
-        particleCount: 4,
+        particleCount: 5,
         angle: 120,
-        spread: 65,
-        origin: { x: 0.95, y: 0.65 },
+        spread: 60,
+        origin: { x: 0.95, y: 0.6 },
         colors
       });
-      confetti({
-        particleCount: 3,
-        angle: 90,
-        spread: 100,
-        origin: { x: 0.5, y: 0.4 },
-        colors
-      });
-
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       }
@@ -62,266 +53,368 @@ export const MixtapeCelebration: React.FC<MixtapeCelebrationProps> = ({
     frame();
   }, []);
 
-  // High-Resolution J-Card Cover Keepsake Generator
+  const formatTimer = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  // High-Resolution 1:1 Scale True Printable J-Card Keepsake Generator (102mm x 165mm @ 300 DPI)
   const handleDownloadKeepsake = () => {
     sound.playChime();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // High resolution 1400x1400 cover art
-    canvas.width = 1400;
-    canvas.height = 1400;
+    // 1950 x 1200 high-res printable canvas
+    canvas.width = 1950;
+    canvas.height = 1200;
 
-    // 1. Warm Paper Background
-    ctx.fillStyle = '#f6efe3';
+    // 1. Studio table background
+    ctx.fillStyle = '#14110f';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Double Tape-Strip Borders (top-left & bottom-right)
+    // 2. Printable Outer Border with Scissor Cut Guides
+    const jcardX = 80;
+    const jcardY = 80;
+    const jcardW = 1790;
+    const jcardH = 1040;
+
+    ctx.fillStyle = '#fffdfa';
+    ctx.fillRect(jcardX, jcardY, jcardW, jcardH);
+    ctx.strokeStyle = '#decbb2';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(jcardX, jcardY, jcardW, jcardH);
+
+    // Scissor Cut Guides at corners
+    ctx.strokeStyle = '#8a7568';
+    ctx.setLineDash([12, 10]);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(jcardX - 15, jcardY - 15, jcardW + 30, jcardH + 30);
+    ctx.setLineDash([]);
+
+    // 3. Panel Dimensions (Flap: 220px, Spine: 280px, Front Cover: 580px, Tracklist: 710px)
+    const flapW = 220;
+    const spineW = 280;
+    const coverW = 580;
+
+    // Dashed Fold Lines
+    ctx.strokeStyle = '#c8b69e';
+    ctx.setLineDash([10, 8]);
+    ctx.lineWidth = 2;
+
+    // Flap fold
+    ctx.beginPath();
+    ctx.moveTo(jcardX + flapW, jcardY);
+    ctx.lineTo(jcardX + flapW, jcardY + jcardH);
+    ctx.stroke();
+
+    // Spine fold
+    ctx.beginPath();
+    ctx.moveTo(jcardX + flapW + spineW, jcardY);
+    ctx.lineTo(jcardX + flapW + spineW, jcardY + jcardH);
+    ctx.stroke();
+
+    // Cover fold
+    ctx.beginPath();
+    ctx.moveTo(jcardX + flapW + spineW + coverW, jcardY);
+    ctx.lineTo(jcardX + flapW + spineW + coverW, jcardY + jcardH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // --- PANEL 1: BACK FLAP (20mm) ---
+    ctx.fillStyle = '#f7f1e5';
+    ctx.fillRect(jcardX + 10, jcardY + 10, flapW - 20, jcardH - 20);
     ctx.save();
-    ctx.globalAlpha = 0.55;
-    ctx.fillStyle = '#e0a458';
-    ctx.fillRect(90, 60, 260, 70);
-    ctx.rotate(-0.02);
+    ctx.translate(jcardX + flapW / 2, jcardY + jcardH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#c96f4a';
+    ctx.font = 'bold 20px "Special Elite", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('✦ OFFICIAL DATE MIXTAPE ✦', 0, -25);
+    ctx.font = '16px monospace';
+    ctx.fillStyle = '#6d5a4e';
+    ctx.fillText('STANDARD CASSETTE CASE 1:1 INSERT', 0, 5);
+    ctx.fillText('✂️ CUT ALONG DASHED LINES & FOLD CREASES', 0, 35);
     ctx.restore();
 
-    ctx.fillStyle = '#fdfaf2';
-    ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
-    ctx.strokeStyle = '#d9a679';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
-
-    ctx.strokeStyle = '#e2d5c2';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(65, 65, canvas.width - 130, canvas.height - 130);
-
-    // Decorative corner reels
-    const drawReel = (x: number, y: number) => {
-      ctx.fillStyle = '#3a3027';
-      ctx.beginPath();
-      ctx.arc(x, y, 34, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#b3a17e';
-      ctx.beginPath();
-      ctx.arc(x, y, 14, 0, Math.PI * 2);
-      ctx.fill();
-    };
-    drawReel(120, 120);
-    drawReel(canvas.width - 120, canvas.height - 120);
-
-    // 3. Header
+    // --- PANEL 2: SPINE (12mm) ---
+    const spineX = jcardX + flapW;
+    ctx.save();
+    ctx.translate(spineX + spineW / 2, jcardY + jcardH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#2d221c';
+    ctx.font = 'bold 32px "Playfair Display", Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#b45f6f';
-    ctx.font = 'bold 20px Georgia, serif';
-    ctx.fillText('✦ THE DATE MIXTAPE · SIDE A ✦', 700, 190);
-
-    ctx.fillStyle = '#4a3b32';
-    ctx.font = 'bold 60px Georgia, serif';
-    ctx.fillText(`A Date with ${APP_CONFIG.girlfriendName} 🎧`, 700, 270);
-
+    ctx.fillText(`${APP_CONFIG.websiteTitle.toUpperCase()} · VOL. 01`, 0, -30);
+    ctx.font = '22px "Special Elite", monospace';
+    ctx.fillStyle = '#c96f4a';
+    ctx.fillText(`${APP_CONFIG.boyfriendInitial} ♥ ${APP_CONFIG.girlfriendInitial} · MASTER RECORDING`, 0, 10);
+    ctx.font = '16px monospace';
     ctx.fillStyle = '#8a7568';
-    ctx.font = 'italic 26px Georgia, serif';
-    ctx.fillText(`${APP_CONFIG.dateRangeText} • Pressed with Love`, 700, 320);
+    ctx.fillText(`#DATE-2026-001 [BARCODE]`, 0, 45);
+    ctx.restore();
 
-    // 4. Cassette Tape Window Graphic
-    const winX = 430;
-    const winY = 370;
-    ctx.fillStyle = '#2f2620';
-    ctx.fillRect(winX, winY, 540, 210);
-    ctx.strokeStyle = '#b3a17e';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(winX, winY, 540, 210);
+    // --- PANEL 3: FRONT COVER (65mm) ---
+    const coverX = spineX + spineW;
+    ctx.fillStyle = '#fcf6ec';
+    ctx.fillRect(coverX + 15, jcardY + 15, coverW - 30, jcardH - 30);
+    ctx.strokeStyle = '#e2d6c3';
+    ctx.strokeRect(coverX + 15, jcardY + 15, coverW - 30, jcardH - 30);
 
-    ctx.fillStyle = '#3a3027';
+    ctx.fillStyle = '#c96f4a';
+    ctx.font = 'bold 20px "Special Elite", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('✦ THE DATE MIXTAPE ✦', coverX + coverW / 2, jcardY + 90);
+
+    ctx.fillStyle = '#2d221c';
+    ctx.font = 'bold 44px "Playfair Display", Georgia, serif';
+    ctx.fillText(`For ${APP_CONFIG.girlfriendName}`, coverX + coverW / 2, jcardY + 165);
+
+    ctx.font = 'italic 24px "Caveat", cursive';
+    ctx.fillStyle = '#6d5a4e';
+    ctx.fillText(APP_CONFIG.coverInscription, coverX + coverW / 2, jcardY + 220);
+
+    // Cassette Spools Vector Artwork on Cover
+    ctx.strokeStyle = '#c96f4a';
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(winX + 150, winY + 105, 70, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.arc(coverX + coverW / 2 - 90, jcardY + 380, 50, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.beginPath();
-    ctx.arc(winX + 390, winY + 105, 70, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.arc(coverX + coverW / 2 + 90, jcardY + 380, 50, 0, Math.PI * 2);
+    ctx.stroke();
 
-    ctx.fillStyle = '#b3a17e';
-    ctx.beginPath();
-    ctx.arc(winX + 150, winY + 105, 26, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(winX + 390, winY + 105, 26, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#2d221c';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText('SIDE A · STEREO HIGH OUTPUT', coverX + coverW / 2, jcardY + 500);
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = '#8a7568';
+    ctx.fillText(APP_CONFIG.dateRangeText, coverX + coverW / 2, jcardY + 540);
 
-    ctx.fillStyle = '#e8dcc6';
-    ctx.font = 'bold 22px Georgia, serif';
-    ctx.fillText(`${APP_CONFIG.boyfriendInitial} ♥ ${APP_CONFIG.girlfriendInitial}`, 700, winY + 172);
+    // If live doodle is saved, draw it on the front cover!
+    const savedDoodle = localStorage.getItem('mixtape_doodle');
+    if (savedDoodle) {
+      const doodleImg = new Image();
+      doodleImg.onload = () => {
+        ctx.drawImage(doodleImg, coverX + coverW / 2 - 160, jcardY + 620, 320, 100);
+      };
+      doodleImg.src = savedDoodle;
+    }
 
-    // 5. Tracklist Box
-    const boxY = 630;
-    ctx.fillStyle = '#fbf4e8';
-    ctx.fillRect(130, boxY, 1140, 480);
-    ctx.strokeStyle = '#d9a679';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(130, boxY, 1140, 480);
-
+    // --- PANEL 4: TRACKLIST & LINER NOTES (68mm) ---
+    const trackX = coverX + coverW + 35;
     ctx.textAlign = 'left';
-    let lineY = boxY + 65;
+    ctx.fillStyle = '#c96f4a';
+    ctx.font = 'bold 24px "Special Elite", monospace';
+    ctx.fillText('SIDE A: OFFICIAL DATE SETLIST', trackX, jcardY + 90);
 
-    const addField = (icon: string, label: string, val: string) => {
-      ctx.fillStyle = '#b45f6f';
-      ctx.font = 'bold 24px Georgia, serif';
-      ctx.fillText(`${icon} ${label}`, 170, lineY);
+    const items = [
+      `01. The When: ${selection.dayDate}`,
+      `02. The Set: ${selection.timeSlot} ${selection.customTime ? `(${selection.customTime})` : ''}`,
+      `03. The Scene: ${selection.location} ${selection.customLocation ? `(${selection.customLocation})` : ''}`,
+      `04. The Vibe: ${selection.activities.join(', ')}`,
+      `05. The Sip: ${selection.drink} ${selection.customDrink ? `(${selection.customDrink})` : ''}`,
+      `06. Bonus Greeting: ${selection.greetings.join(', ')}`
+    ];
 
-      ctx.fillStyle = '#4a3b32';
-      ctx.font = '26px Georgia, serif';
-      ctx.fillText(val, 170, lineY + 38);
+    ctx.font = '21px "Playfair Display", Georgia, serif';
+    ctx.fillStyle = '#2d221c';
+    items.forEach((txt, idx) => {
+      ctx.fillText(txt, trackX, jcardY + 160 + idx * 55);
+    });
 
-      ctx.strokeStyle = '#e2d5c2';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(170, lineY + 60);
-      ctx.lineTo(170 + 1060, lineY + 60);
-      ctx.stroke();
+    if (selection.customNotes) {
+      ctx.font = 'italic 24px "Caveat", cursive';
+      ctx.fillStyle = '#c96f4a';
+      ctx.fillText(`Liner Note: "${selection.customNotes}"`, trackX, jcardY + 560);
+    }
 
-      lineY += 100;
-    };
-
-    addField('🎧', 'TRACK 1 · WHEN:', selection.dayDate);
-    addField('⏰', 'TRACK 2 · TIME:', selection.timeSlot);
-    addField('📍', 'TRACK 3 · WHERE:', selection.customLocation || selection.location || 'Our Spot');
-
-    const acts = selection.activities.join(', ') + (selection.customActivity ? ` + ${selection.customActivity}` : '');
-    addField('🎸', 'TRACK 4 · VIBE:', acts);
-    addField('☕', 'TRACK 5 · SIPS:', selection.customDrink || selection.drink);
-
-    // 6. Footer Proclamation
-    ctx.textAlign = 'center';
-    ctx.font = 'italic 30px Georgia, serif';
-    ctx.fillStyle = '#b45f6f';
-    ctx.fillText('~ Recorded, rewound, and replayed by my heart ~', 700, 1180);
-
-    ctx.font = 'bold 24px Georgia, serif';
-    ctx.fillStyle = '#d9a441';
-    ctx.fillText(`FOREVER YOURS, ${APP_CONFIG.boyfriendName.toUpperCase()} ❤️`, 700, 1230);
-
-    ctx.font = '18px Georgia, serif';
+    ctx.font = '16px monospace';
     ctx.fillStyle = '#8a7568';
-    ctx.fillText('No pause button • We play this one on repeat 😌✨', 700, 1280);
+    ctx.fillText(`Recorded with love · ${APP_CONFIG.boyfriendName} & ${APP_CONFIG.girlfriendName}`, trackX, jcardY + 950);
 
-    // Export image
-    const link = document.createElement('a');
-    link.download = `${APP_CONFIG.girlfriendName}_${APP_CONFIG.boyfriendName}_Mixtape_Cover_${selection.isoDate}.png`;
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
-    setCardDownloaded(true);
+    // Export & Download PNG
+    setTimeout(() => {
+      const link = document.createElement('a');
+      link.download = `1-to-1-date-mixtape-jcard-${APP_CONFIG.girlfriendName.toLowerCase()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      setCardDownloaded(true);
+    }, 100);
+  };
+
+  const handleWhatsAppShare = () => {
+    sound.playChime();
+    const formattedText = `🎧 *THE DATE MIXTAPE · SIDE A* 🎧\n\n` +
+      `📅 *Date:* ${selection.dayDate}\n` +
+      `⏰ *Time:* ${selection.timeSlot}\n` +
+      `📍 *Location:* ${selection.location}\n` +
+      `🎸 *Activities:* ${selection.activities.join(', ')}\n` +
+      `☕ *Drink:* ${selection.drink}\n` +
+      `💫 *Greeting:* ${selection.greetings.join(', ')}\n` +
+      (selection.customNotes ? `\n✍️ *Liner Note:* "${selection.customNotes}"\n` : '') +
+      `\n❤️ Pressed with love for you!`;
+
+    const url = `https://wa.me/?text=${encodeURIComponent(formattedText)}`;
+    window.open(url, '_blank');
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.92, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-      className="max-w-xl mx-auto w-full px-3 pb-16 text-center select-none"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="max-w-2xl mx-auto w-full px-3 pb-16 text-center select-none"
     >
-      <motion.div
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-        className="jcard-card p-8 sm:p-10 rounded-2xl shadow-paper-lg mb-6 relative"
-      >
-        <div className="tape-strip -top-2.5 left-1/2 -translate-x-1/2 w-28" />
+      <div className="walkman-faceplate p-4 sm:p-7 rounded-3xl relative overflow-hidden mb-6">
+        <div className="screw-fastener absolute left-3 top-3" />
+        <div className="screw-fastener absolute right-3 top-3" />
+        <div className="screw-fastener absolute left-3 bottom-3" />
+        <div className="screw-fastener absolute right-3 bottom-3" />
 
-        <div className="text-4xl sm:text-5xl mb-3 flex items-center justify-center gap-3">
-          <span className="animate-heart-beat inline-block">🔴</span>
-          <span className="animate-bounce inline-block">🎧 💿 🎶</span>
-          <span className="animate-heart-beat inline-block delay-300">💖</span>
+        <div className="flex items-center justify-between border-b border-[#44382f] pb-3 mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
+            <span className="text-[10px] font-mono tracking-[0.25em] text-emerald-400 uppercase font-bold">
+              ● MASTER TAPE RECORDED & LOCKED
+            </span>
+          </div>
+          <div className="font-mono text-xs text-[#d4af37] bg-[#1a1410] px-2.5 py-0.5 rounded border border-[#5a483a]">
+            REC TIME: {formatTimer(recordedSeconds)}
+          </div>
         </div>
 
-        <span className="text-xs font-typewriter tracking-[0.3em] text-mixtape-rose uppercase">
-          RECORDING COMPLETE
-        </span>
+        {/* 3-Panel Unfolded J-Card Presentation */}
+        <div className="mixtape-card p-4 sm:p-6 rounded-2xl relative text-left mb-6">
+          <div className="tape-strip -top-2 left-8 w-24" />
+          <div className="tape-strip tape-strip-reverse -top-2 right-8 w-24" />
 
-        <h1 className="font-serif-title text-2xl sm:text-3xl text-mixtape-coffee mt-1 mb-2">
-          📼 The Date Mixtape Is Live! 📼
-        </h1>
+          <div className="text-center pb-4 border-b border-[#decbb2]/80 mb-4">
+            <span className="text-[10px] font-mono tracking-[0.3em] text-[#c96f4a] uppercase font-bold">
+              ✦ OFFICIAL DATE J-CARD SLEEVE ✦
+            </span>
+            <h1 className="font-display text-2xl sm:text-3xl text-[#2d221c] mt-1">
+              Recorded for {APP_CONFIG.girlfriendName} ❤️
+            </h1>
+            <p className="font-handwriting text-lg text-[#6d5a4e] mt-1">
+              "The best tracks are the ones we live together"
+            </p>
+          </div>
 
-        <p className="font-handwriting text-2xl text-mixtape-roseDark mb-6">
-          “Side A recorded. It's the only tape I'll ever need. 😌”
-        </p>
+          {/* 3 Panel Visual Preview Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Panel 1: Spine */}
+            <div className="bg-[#f7f1e5] p-3.5 rounded-xl border border-[#decbb2] flex flex-col justify-between text-center">
+              <div>
+                <span className="text-[9px] font-mono text-[#8a7568] tracking-widest uppercase">
+                  SPINE · VOL 1
+                </span>
+                <div className="font-serif font-bold text-sm text-[#2d221c] mt-1">
+                  THE DATE MIXTAPE
+                </div>
+              </div>
+              <div className="my-3 font-mono text-xs text-[#c96f4a] font-bold">
+                {APP_CONFIG.boyfriendInitial} ♥ {APP_CONFIG.girlfriendInitial}
+              </div>
+              <span className="text-[8px] font-mono text-[#8a7568]">
+                #DATE-2026-001
+              </span>
+            </div>
 
-        {/* Recording Meter */}
-        <div className="bg-mixtape-cream border border-mixtape-border p-3 rounded-xl text-xs text-mixtape-coffeeLight flex items-center justify-center gap-2 shadow-xs">
-          <span className="text-mixtape-rose animate-heart-beat inline-block">🔴</span>
-          <span className="font-typewriter tracking-widest">
-            REC {String(recordedSeconds).padStart(3, '0')}:{String(Math.floor(recordedSeconds * 60) % 60).padStart(2, '0')} ·
-            REWINDING FOREVER
-          </span>
+            {/* Panel 2: Front Cover Artwork */}
+            <div className="bg-[#fcf6ec] p-3.5 rounded-xl border border-[#decbb2] text-center flex flex-col justify-between">
+              <span className="text-[9px] font-mono text-[#c96f4a] tracking-widest">
+                FRONT COVER
+              </span>
+              <div className="my-2">
+                <div className="font-display text-lg text-[#2d221c]">
+                  Side A
+                </div>
+                <div className="font-serif text-xs text-[#6d5a4e]">
+                  {APP_CONFIG.dateRangeText}
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-[#2b221b] border border-[#d4af37] mx-auto flex items-center justify-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#d85848]" />
+              </div>
+            </div>
+
+            {/* Panel 3: Tracklist */}
+            <div className="bg-[#f7f1e5] p-3.5 rounded-xl border border-[#decbb2] text-xs flex flex-col justify-between">
+              <div>
+                <span className="text-[9px] font-mono text-[#c96f4a] tracking-widest uppercase font-bold">
+                  TRACKLIST
+                </span>
+                <div className="space-y-1 mt-1 text-[11px] font-serif text-[#2d221c]">
+                  <div>📅 {selection.dayDate}</div>
+                  <div>⏰ {selection.timeSlot}</div>
+                  <div>📍 {selection.location}</div>
+                  <div>☕ {selection.drink}</div>
+                </div>
+              </div>
+              <span className="text-[8px] font-mono text-[#8a7568] mt-2">
+                MASTER CONFIRMED
+              </span>
+            </div>
+          </div>
+
+          {/* Liner Note Highlight */}
+          {selection.customNotes && (
+            <div className="mt-4 p-3 bg-[#fcf6ec] rounded-xl border border-[#decbb2] text-center font-handwriting text-lg text-[#c96f4a]">
+              "{selection.customNotes}"
+            </div>
+          )}
         </div>
 
-        {/* Email Notification Dispatch Status */}
-        <div className="mt-3 bg-mixtape-cream border border-mixtape-border p-3 rounded-xl text-xs text-mixtape-coffeeLight flex items-center justify-center gap-2 shadow-xs">
-          <span>💌</span>
-          <span>Your mixtape was sealed & emailed! ✨</span>
-        </div>
-      </motion.div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-3 mb-6">
-        {/* WhatsApp Share */}
-        <motion.a
-          whileHover={{ scale: 1.02, y: -1 }}
-          whileTap={{ scale: 0.98 }}
-          href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-            `Hey ${APP_CONFIG.boyfriendName}! 🎧 The Date Mixtape is recorded!\n\n📅 Track 1 · When: ${selection.dayDate} (${selection.customTime || selection.timeSlot})\n📍 Track 2 · Where: ${selection.customLocation || selection.location || 'Our Spot'}\n🎸 Track 3 · Vibe: ${selection.activities.join(', ')}${selection.customActivity ? ` + ${selection.customActivity}` : ''}\n☕ Track 4 · Sips: ${selection.customDrink || selection.drink}\n\nLet's press play! 🎶✨`
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => sound.playChime()}
-          className="w-full py-3.5 px-5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-semibold text-xs sm:text-sm rounded-full shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
-        >
-          <span>💬</span>
-          <span>Send Mixtape Summary on WhatsApp</span>
-        </motion.a>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <motion.button
-            whileHover={{ scale: 1.04, y: -2 }}
-            whileTap={{ scale: 0.96 }}
+        {/* Action Buttons Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <button
+            type="button"
             onClick={handleDownloadKeepsake}
-            className="mix-btn-primary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            className="btn-transport-primary p-3 rounded-xl font-serif font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
-            <span>💿</span>
-            <span>{cardDownloaded ? 'Cover Saved! ✓' : 'Save Mixtape Cover'}</span>
-          </motion.button>
+            <span>📥</span>
+            <span>{cardDownloaded ? 'DOWNLOADED AGAIN ✦' : 'DOWNLOAD 1:1 CASSETTE J-CARD'}</span>
+          </button>
 
-          <motion.button
-            whileHover={{ scale: 1.04, y: -2 }}
-            whileTap={{ scale: 0.96 }}
+          <button
+            type="button"
             onClick={() => {
               sound.playChime();
               setShowLetter(true);
             }}
-            className="mix-btn-secondary py-3.5 px-5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            className="btn-transport p-3 rounded-xl font-serif font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>💌</span>
-            <span>Open Liner Notes ✉️</span>
-          </motion.button>
+            <span>OPEN SECRET LINER NOTE</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleWhatsAppShare}
+            className="btn-transport p-3 rounded-xl font-mono text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-emerald-400"
+          >
+            <span>💬</span>
+            <span>SHARE SETLIST ON WHATSAPP</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sound.playButtonClunk();
+              onReset();
+            }}
+            className="btn-transport p-3 rounded-xl font-mono text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-[#a89888]"
+          >
+            <span>🔄</span>
+            <span>PRESS RECORD AGAIN</span>
+          </button>
         </div>
       </div>
 
-      {/* Reset Link */}
-      <div>
-        <button
-          onClick={() => {
-            sound.playPageTurn();
-            onReset();
-          }}
-          className="font-serif text-xs text-mixtape-coffeeLight hover:text-mixtape-roseDark underline cursor-pointer"
-        >
-          Start over / Record Side B
-        </button>
-      </div>
-
-      <MixtapeLetter
-        isOpen={showLetter}
-        onClose={() => setShowLetter(false)}
-      />
+      {showLetter && (
+        <MixtapeLetter onClose={() => setShowLetter(false)} />
+      )}
     </motion.div>
   );
 };

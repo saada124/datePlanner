@@ -31,7 +31,7 @@ export const TrackActivity: React.FC<TrackActivityProps> = ({
   const toggleActivity = (id: string) => {
     let next: string[];
     if (activities.includes(id)) {
-      sound.playPageTurn();
+      sound.playButtonClunk();
       next = activities.filter(a => a !== id);
     } else {
       sound.playChime();
@@ -51,12 +51,19 @@ export const TrackActivity: React.FC<TrackActivityProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-3"
     >
-      <p className="font-handwriting text-base sm:text-lg text-mixtape-coffeeLight mb-3">
-        Curate our playlist of activities — pick as many as you like 🎸
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="font-handwriting text-base sm:text-lg text-[#6d5a4e]">
+          Curate the setlist — pick as many activities as you like 🎸
+        </p>
+        <span className="text-[10px] font-mono uppercase bg-[#ebdcc7] text-[#5c4738] px-2 py-0.5 rounded border border-[#decbb2]">
+          {activities.length} TRACK{activities.length === 1 ? '' : 'S'} QUEUED
+        </span>
+      </div>
 
+      {/* Cassette Singles Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {ACTIVITIES.map((act) => {
           const isSelected = activities.includes(act.id);
@@ -64,38 +71,41 @@ export const TrackActivity: React.FC<TrackActivityProps> = ({
             <motion.button
               key={act.id}
               type="button"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => toggleActivity(act.id)}
-              className={`p-2.5 rounded-lg border flex flex-col items-center justify-between min-h-[100px] text-center transition-all cursor-pointer relative ${
+              className={`p-3 rounded-xl border flex flex-col items-center justify-between min-h-[105px] text-center transition-all duration-200 cursor-pointer relative ${
                 isSelected
-                  ? 'bg-mixtape-blush border-mixtape-rose shadow-md ring-2 ring-mixtape-rose/30'
-                  : 'bg-white border-mixtape-border hover:border-mixtape-rose/40'
+                  ? 'bg-[#fffdfa] border-[#c96f4a] shadow-md ring-2 ring-[#c96f4a]/30'
+                  : 'bg-[#f7f1e5]/80 border-[#decbb2] hover:border-[#c96f4a]/50 text-[#4a3b32]'
               }`}
             >
+              {/* Micro-LED in Top Corner */}
+              <div className="absolute top-2 right-2">
+                <div className={`micro-led ${isSelected ? 'active-green' : ''}`} />
+              </div>
+
               <div className="text-2xl my-1">{act.icon}</div>
-              <div className="font-serif text-xs font-semibold text-mixtape-coffee leading-snug">
+              <div className="font-serif text-xs font-bold text-[#2d221c] leading-snug">
                 {act.title}
               </div>
-              <div className="text-[10px] text-mixtape-coffeeLight line-clamp-1 mt-0.5 font-sans">
+              <div className="text-[10px] text-[#8a7568] line-clamp-1 mt-0.5 font-sans">
                 {act.desc}
               </div>
-              {isSelected && (
-                <span className="absolute top-1.5 right-1.5 text-xs text-mixtape-rose">♥</span>
-              )}
             </motion.button>
           );
         })}
       </div>
 
-      <div className="mt-3 border-t border-mixtape-border/70 pt-3">
+      {/* Custom Activity Entry */}
+      <div className="pt-2 border-t border-[#decbb2]/80">
         <button
           type="button"
           onClick={() => setShowCustom(!showCustom)}
-          className="text-xs font-serif text-mixtape-roseDark hover:underline flex items-center gap-1.5 cursor-pointer"
+          className="text-xs font-serif font-semibold text-[#c96f4a] hover:underline flex items-center gap-1.5 cursor-pointer"
         >
           <span>{showCustom ? '−' : '+'}</span>
-          <span>{showCustom ? 'Hide custom idea' : 'Have a special idea in mind?'}</span>
+          <span>{showCustom ? 'Hide custom track' : 'Add a custom unreleased track...'}</span>
         </button>
 
         {showCustom && (
@@ -108,8 +118,8 @@ export const TrackActivity: React.FC<TrackActivityProps> = ({
               type="text"
               value={customVal}
               onChange={(e) => handleCustomChange(e.target.value)}
-              placeholder="e.g. Stargazing, cooking dessert together, a secret spot..."
-              className="w-full bg-white border border-mixtape-border rounded-lg p-2.5 text-xs focus:outline-none focus:border-mixtape-terracotta"
+              placeholder="e.g. Acoustic jam session, late night drive, rooftop dessert..."
+              className="w-full bg-[#fffdfa] border border-[#c96f4a] rounded-xl p-2.5 text-xs font-serif text-[#2d221c] focus:outline-none focus:ring-2 focus:ring-[#c96f4a]/30 shadow-inner"
             />
           </motion.div>
         )}

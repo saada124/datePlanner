@@ -49,7 +49,7 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 ## Quick Start (Super simple)
 
 ```bash
-cd "retro style"      # or "midnight style" / "storybook style" / "watercolor" / "win95 style" / "mixtape" / "island style" / "cafe style"
+cd "retro style"      # or "midnight style" / "watercolor" / etc...
 npm install
 npm run dev          # start the local server
 npm run build        # production build → dist/
@@ -140,14 +140,6 @@ The **Date Menu (`menu style/`)** version includes an interactive Vintage Vinyl 
    👉 `menu style/public/audio/couple-song.mp3`
 2. Open `menu style/src/config/appConfig.ts` and set your title & volume under the `audio` section.
 3. Your song will automatically be selectable in the Table Jukebox turntable popup!
-
-## Voice Note 🎙️ (watercolor)
-
-The watercolor version can play a personal voice message:
-
-1. Save your recording as `watercolor/public/audio/voice-note.mp3`.
-2. That's it — the record player appears with equalizer bars and acoustic synth fallback.
-3. To hide it, open `watercolor/src/config/appConfig.ts` and set `voiceNote.src` to `''`.
 
 ## Roadmap 🚧
 

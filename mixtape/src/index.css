@@ -5,211 +5,349 @@
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #f6efe3;
+    background-color: #14110f;
     background-image:
-      radial-gradient(rgba(217, 166, 121, 0.08) 1.5px, transparent 1.5px),
-      radial-gradient(rgba(216, 138, 138, 0.05) 1.5px, transparent 1.5px);
-    background-size: 36px 36px;
-    background-position: 0 0, 18px 18px;
+      radial-gradient(ellipse at 50% 0%, rgba(201, 111, 74, 0.08) 0%, transparent 60%),
+      radial-gradient(rgba(217, 166, 121, 0.04) 1.5px, transparent 1.5px),
+      radial-gradient(rgba(0, 0, 0, 0.4) 1.5px, transparent 1.5px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+    background-position: 0 0, 0 0, 14px 14px;
     min-height: 100vh;
-    color: #4a3b32;
+    color: #ede3d8;
   }
 }
 
-/* Warm paper card */
-.jcard-card {
-  background-color: #fdfaf2;
-  border: 1px solid #e2d5c2;
-  box-shadow: 0 12px 32px -6px rgba(74, 59, 50, 0.2), 0 4px 12px -2px rgba(74, 59, 50, 0.1);
+/* ============================================================
+   🎛️ SKEUOMORPHIC WALKMAN CHASSIS & HARDWARE
+   ============================================================ */
+
+/* Brushed Titanium Walkman Player Faceplate */
+.walkman-faceplate {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 4px),
+    linear-gradient(175deg, #362e28 0%, #251f1b 35%, #1c1815 100%);
+  border: 1px solid #4a3e35;
+  border-radius: 28px;
+  box-shadow:
+    0 35px 80px -15px rgba(0, 0, 0, 0.85),
+    0 12px 28px -4px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.5);
   position: relative;
 }
 
-.jcard-card-cream {
-  background: linear-gradient(160deg, #fdfaf2 0%, #f9e8dd 100%);
-  border: 1px solid #eed8c4;
+/* Chrome/Brass Phillips Head Screws */
+.screw-fastener {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%, #fffdfa 0%, #c8b695 45%, #7a6a52 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.6);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Translucent sticky tape strip */
+.screw-fastener::before,
+.screw-fastener::after {
+  content: '';
+  position: absolute;
+  background-color: #382c20;
+}
+
+.screw-fastener::before {
+  width: 7px;
+  height: 1.5px;
+  border-radius: 0.5px;
+}
+
+.screw-fastener::after {
+  width: 1.5px;
+  height: 7px;
+  border-radius: 0.5px;
+}
+
+/* ============================================================
+   🚪 3D SPRING-LOADED EJECT CARRIAGE DOOR
+   ============================================================ */
+
+.eject-carriage-wrapper {
+  perspective: 900px;
+}
+
+.eject-carriage-door {
+  transform-origin: bottom center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.eject-carriage-door.open {
+  transform: rotateX(-26deg) translateY(-8px);
+  box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.8), inset 0 2px 6px rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   📼 4 COLLECTOR CASSETTE SHELL EDITIONS
+   ============================================================ */
+
+/* 1. Smoked Titanium (Classic 80s) */
+.shell-titanium .tape-well {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(224, 164, 88, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #15110e 0%, #0d0a08 100%);
+  border: 1.5px solid #3d332a;
+}
+
+/* 2. Sunset Rose Quartz (Translucent Pastel Blush) */
+.shell-rose .tape-well {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(216, 138, 138, 0.2) 0%, transparent 70%),
+    linear-gradient(180deg, #2b181c 0%, #1a0f12 100%);
+  border: 1.5px solid #6b3d45;
+  box-shadow: inset 0 0 18px rgba(216, 138, 138, 0.15);
+}
+
+/* 3. Clear Gold Foil (Luxury 90s Gold Master) */
+.shell-gold .tape-well {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(212, 175, 55, 0.18) 0%, transparent 70%),
+    linear-gradient(180deg, #1a160d 0%, #0e0c07 100%);
+  border: 1.5px solid #7a6328;
+  box-shadow: inset 0 0 18px rgba(212, 175, 55, 0.15);
+}
+
+/* 4. Chalk Studio White (Matte Paper Acoustic Demo) */
+.shell-chalk .tape-well {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.12) 0%, transparent 70%),
+    linear-gradient(180deg, #282522 0%, #191715 100%);
+  border: 1.5px solid #5a544c;
+}
+
+/* Acrylic Reflection Glass Overlay */
+.acrylic-glare {
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 50%, rgba(255, 255, 255, 0.04) 100%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   📊 DUAL ANALOG VU METER GAUGE
+   ============================================================ */
+
+.vu-gauge {
+  background:
+    radial-gradient(circle at 50% 80%, rgba(255, 245, 230, 0.95) 0%, #ebdcc7 65%, #d9c4aa 100%);
+  border: 1px solid #7c6853;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.vu-needle {
+  transform-origin: bottom center;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.4, 1);
+  will-change: transform;
+}
+
+/* ============================================================
+   🔄 3D CASSETTE FLIP (SIDE A ⇄ SIDE B)
+   ============================================================ */
+
+.cassette-flip-container {
+  perspective: 1200px;
+}
+
+.cassette-flip-inner {
+  transition: transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cassette-flip-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.cassette-flip-front,
+.cassette-flip-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.cassette-flip-back {
+  transform: rotateY(180deg);
+}
+
+/* ============================================================
+   🏷️ TACTILE CASSETTE PAPER CARDS & LABELS
+   ============================================================ */
+
+/* Vintage Parchment Card */
+.mixtape-card {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.7) 0%, transparent 60%),
+    linear-gradient(170deg, #fffdfa 0%, #fbf5eb 60%, #f4e9d8 100%);
+  border: 1px solid #decbb2;
+  border-radius: 14px;
+  color: #2b2019;
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.25),
+    0 2px 6px -1px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Adhesive Washi Tape Strips */
 .tape-strip {
   position: absolute;
-  height: 22px;
-  background: linear-gradient(90deg, rgba(217, 166, 121, 0.55), rgba(224, 164, 88, 0.45), rgba(217, 166, 121, 0.55));
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(74, 59, 50, 0.12);
-  transform: rotate(-2deg);
+  height: 20px;
+  background: linear-gradient(90deg, rgba(224, 164, 88, 0.65), rgba(235, 185, 120, 0.55), rgba(224, 164, 88, 0.65));
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(43, 32, 25, 0.2);
+  transform: rotate(-2.5deg);
   z-index: 10;
+  backdrop-filter: blur(1px);
 }
 
 .tape-strip-reverse {
-  transform: rotate(2deg);
+  transform: rotate(2.5deg);
 }
 
-/* Typewriter utility */
-.font-typewriter {
-  font-family: 'Special Elite', 'Courier New', monospace;
-}
-
-.font-handwriting {
-  font-family: 'Caveat', cursive;
-}
-
-.font-serif-title {
-  font-family: 'Playfair Display', Georgia, serif;
-}
-
-/* Warm mixtape buttons */
-.mix-btn-primary {
-  background: linear-gradient(135deg, #c96f4a 0%, #b45f6f 130%);
-  color: #ffffff;
-  border-radius: 9999px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 600;
-  box-shadow: 0 6px 18px -4px rgba(201, 111, 74, 0.4);
+/* Glowing Micro-LED Status Indicators */
+.micro-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #4a3e35;
+  border: 1px solid #2a2019;
   transition: all 0.25s ease;
 }
 
-.mix-btn-primary:hover {
-  background: linear-gradient(135deg, #b95f3c 0%, #a45060 130%);
-  box-shadow: 0 8px 24px -4px rgba(180, 95, 111, 0.5);
-  transform: translateY(-2px);
+.micro-led.active-green {
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981, 0 0 16px rgba(16, 185, 129, 0.6);
+  border-color: #34d399;
 }
 
-.mix-btn-primary:active {
-  transform: translateY(1px);
+.micro-led.active-amber {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b, 0 0 16px rgba(245, 158, 11, 0.6);
+  border-color: #fbbf24;
 }
 
-.mix-btn-secondary {
-  background-color: #fdfaf2;
-  color: #4a3b32;
-  border: 1px solid #e2d5c2;
-  border-radius: 9999px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(74, 59, 50, 0.08);
-  transition: all 0.25s ease;
+.micro-led.active-red {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.7);
+  border-color: #f87171;
 }
 
-.mix-btn-secondary:hover {
-  background-color: #fbf4e8;
-  border-color: #d9a679;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 59, 50, 0.12);
-}
+/* ============================================================
+   🕹️ MECHANICAL PHYSICAL BUTTONS & EQ FADERS
+   ============================================================ */
 
-.mix-btn-secondary:active {
-  transform: translateY(1px);
-}
-
-/* Escaping button: no CSS transform — framer-motion's spring owns it */
-.mix-btn-escaping {
-  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.mix-btn-escaping:hover,
-.mix-btn-escaping:active {
-  transform: none;
-}
-
-/* Cassette deck shell */
-.deck-shell {
-  background: linear-gradient(160deg, #e0d4bf 0%, #d3c3a8 100%);
-  border: 1px solid #c8b695;
-  border-radius: 14px;
-  box-shadow: 0 10px 28px -6px rgba(74, 59, 50, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.deck-reel {
-  background:
-    radial-gradient(circle at 30% 30%, #fdfaf2 0%, #e9dfcc 55%, #cfc0a6 100%);
-  border: 2px solid #b3a17e;
-  box-shadow: inset 0 0 8px rgba(74, 59, 50, 0.25);
-}
-
-/* Record button */
-.rec-btn {
-  background: radial-gradient(circle at 35% 30%, #ff8f8f, #d43a3a 60%, #a52828);
-  box-shadow: 0 0 0 5px rgba(216, 138, 138, 0.25), 0 6px 20px -4px rgba(180, 95, 111, 0.6);
-}
-
-.rec-btn.recording {
-  animation: recPulse 1s ease-in-out infinite;
-}
-
-@keyframes recPulse {
-  0%, 100% { box-shadow: 0 0 0 5px rgba(216, 138, 138, 0.25), 0 6px 20px -4px rgba(180, 95, 111, 0.6); }
-  50% { box-shadow: 0 0 0 10px rgba(216, 138, 138, 0.08), 0 6px 24px -2px rgba(180, 95, 111, 0.8); }
-}
-
-/* ---- Big warm-paper cassette ---- */
-
-.cassette-shell {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 12%),
-    linear-gradient(160deg, #eee2cc 0%, #e4d5ba 45%, #d9c8a9 100%);
-  border: 1px solid #c8b695;
-  border-radius: 26px;
+.btn-transport {
+  background: linear-gradient(180deg, #443930 0%, #2f2721 100%);
+  color: #ede3d8;
+  border: 1px solid #5a4c40;
+  border-bottom: 1px solid #1a1512;
   box-shadow:
-    0 24px 60px -12px rgba(74, 59, 50, 0.35),
-    0 6px 16px -6px rgba(74, 59, 50, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    0 5px 0 #181310,
+    0 8px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
-.cassette-window {
+.btn-transport:hover:not(:disabled) {
+  background: linear-gradient(180deg, #4e4238 0%, #362e27 100%);
+}
+
+.btn-transport:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 #181310,
+    0 3px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-transport-primary {
+  background: linear-gradient(180deg, #c96f4a 0%, #aa5433 100%);
+  color: #ffffff;
+  border: 1px solid #dc8562;
+  border-bottom: 1px solid #6b2f18;
+  box-shadow:
+    0 5px 0 #54220f,
+    0 8px 18px rgba(201, 111, 74, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-transport-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #d47b56 0%, #b85c39 100%);
+}
+
+.btn-transport-primary:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 #54220f,
+    0 3px 8px rgba(201, 111, 74, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-rec-heavy {
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0) 60%),
-    linear-gradient(180deg, #3a3027 0%, #241e18 100%);
-  border: 1px solid #8d7c5f;
-  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.55), inset 0 -1px 0 rgba(216, 201, 178, 0.15);
+    radial-gradient(circle at 35% 30%, #ff6b6b 0%, #dc2626 50%, #991b1b 100%);
+  border: 2px solid #f87171;
+  border-bottom-color: #581010;
+  box-shadow:
+    0 6px 0 #450a0a,
+    0 10px 24px rgba(220, 38, 38, 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
-.label-panel {
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(251, 244, 232, 0.9) 0%, rgba(0, 0, 0, 0) 55%),
-    linear-gradient(165deg, #fdfaf2 0%, #f7ecdc 100%);
-  border: 1px solid #e4d3b6;
-  box-shadow: inset 0 2px 6px rgba(74, 59, 50, 0.06), 0 2px 10px -4px rgba(74, 59, 50, 0.18);
+.btn-rec-heavy:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    0 1px 0 #450a0a,
+    0 3px 8px rgba(220, 38, 38, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
-.cassette-screw {
-  width: 9px;
-  height: 9px;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 32% 30%, #fdfaf2 0%, #b3a17e 60%, #8d7c5f 100%);
-  box-shadow: inset 0 -1px 2px rgba(74, 59, 50, 0.5), 0 1px 2px rgba(255, 255, 255, 0.6);
+/* EQ Vertical Sliders */
+.eq-slider-track {
+  width: 6px;
+  height: 60px;
+  background: #181310;
+  border: 1px solid #4a3e35;
+  border-radius: 3px;
+  position: relative;
 }
 
-.cassette-tab {
-  width: 15px;
-  height: 11px;
-  border: 1px solid #c8b695;
-  border-top: none;
-  border-radius: 0 0 3px 3px;
-  background: linear-gradient(180deg, #e9ddc6, #dccbab);
-  box-shadow: 0 2px 3px -1px rgba(74, 59, 50, 0.25);
+.eq-fader-knob {
+  width: 20px;
+  height: 10px;
+  background: linear-gradient(180deg, #d4af37 0%, #a88824 100%);
+  border: 1px solid #f7e6a0;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
 }
 
-.tape-path-line {
-  background: linear-gradient(90deg, rgba(216, 201, 178, 0.35), rgba(216, 201, 178, 0.12), rgba(216, 201, 178, 0.35));
-}
-
-/* Film grain overlay (Vintage Analog style) */
-.film-grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
-}
-
-/* Subtle warm light-leak gradient */
-.light-leak {
+/* Analog Film Grain Texture Overlay */
+.analog-grain {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 4;
-  background:
-    radial-gradient(ellipse at 15% -10%, rgba(224, 164, 88, 0.16) 0%, rgba(0, 0, 0, 0) 55%),
-    radial-gradient(ellipse at 105% 105%, rgba(216, 138, 138, 0.12) 0%, rgba(0, 0, 0, 0) 50%);
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
 }

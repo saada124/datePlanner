@@ -30,7 +30,7 @@ export const TrackGreeting: React.FC<TrackGreetingProps> = ({
   const toggleGreeting = (id: string) => {
     let next: string[];
     if (greetings.includes(id)) {
-      sound.playPageTurn();
+      sound.playButtonClunk();
       next = greetings.filter(g => g !== id);
     } else {
       sound.playChime();
@@ -50,51 +50,60 @@ export const TrackGreeting: React.FC<TrackGreetingProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-3"
     >
-      <p className="font-handwriting text-base sm:text-lg text-mixtape-coffeeLight mb-3">
-        Pick the moment that says hello 💫
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="font-handwriting text-base sm:text-lg text-[#6d5a4e]">
+          The Sweet Spot — How should we greet each other? 💫
+        </p>
+        <span className="text-[10px] font-mono text-[#8a7568]">BONUS TRACK</span>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      {/* Greeting Chips Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {GREETINGS.map((g) => {
           const isSelected = greetings.includes(g.id);
           return (
-            <motion.button
+            <button
               key={g.id}
               type="button"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
               onClick={() => toggleGreeting(g.id)}
-              className={`p-2.5 rounded-lg border flex flex-col items-center justify-center min-h-[88px] text-center transition-all cursor-pointer relative ${
+              className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-200 cursor-pointer relative min-h-[75px] ${
                 isSelected
-                  ? 'bg-mixtape-blush border-mixtape-rose shadow-md ring-2 ring-mixtape-rose/30'
-                  : 'bg-white border-mixtape-border hover:border-mixtape-rose/40'
+                  ? 'bg-[#fffdfa] border-[#c96f4a] shadow-sm ring-2 ring-[#c96f4a]/30'
+                  : 'bg-[#f7f1e5]/80 border-[#decbb2] hover:border-[#c96f4a]/50 text-[#4a3b32]'
               }`}
             >
-              <div className="text-2xl mb-1.5">{g.icon}</div>
-              <div className="font-serif text-xs font-semibold text-mixtape-coffee leading-snug">
+              <div className="text-xl mb-0.5">{g.icon}</div>
+              <div className="font-serif text-xs font-bold text-[#2d221c] leading-tight">
                 {g.label}
               </div>
-              {isSelected && (
-                <span className="absolute top-1.5 right-1.5 text-xs text-mixtape-rose">♥</span>
-              )}
-            </motion.button>
+              <div className={`micro-led absolute top-1.5 right-1.5 ${isSelected ? 'active-green' : ''}`} />
+            </button>
           );
         })}
       </div>
 
-      <div className="mt-3 border-t border-mixtape-border/70 pt-3">
-        <label className="block text-xs font-serif text-mixtape-coffeeLight mb-2">
-          A little note to drop on the J-card (optional)
-        </label>
-        <textarea
-          value={notes}
-          onChange={(e) => handleNotesChange(e.target.value)}
-          rows={2}
-          placeholder="e.g. Don't be late, my heart starts early..."
-          className="w-full bg-white border border-mixtape-border rounded-lg p-2.5 text-xs focus:outline-none focus:border-mixtape-terracotta resize-none"
-        />
+      {/* Handwritten Liner Note Section */}
+      <div className="pt-3 border-t border-[#decbb2]/80">
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="font-serif text-xs font-bold text-[#2d221c] flex items-center gap-1.5">
+            <span>✍️</span>
+            <span>Side A Liner Note / Secret Message (Optional)</span>
+          </label>
+          <span className="text-[9px] font-mono text-[#8a7568]">HANDWRITTEN INK</span>
+        </div>
+
+        <div className="relative">
+          <textarea
+            value={notes}
+            onChange={(e) => handleNotesChange(e.target.value)}
+            rows={2}
+            placeholder="Write a sweet whisper, special song request, or note for the tape insert..."
+            className="w-full bg-[#fffdfa] border border-[#decbb2] rounded-xl p-3 font-handwriting text-lg text-[#2d221c] focus:outline-none focus:border-[#c96f4a] focus:ring-2 focus:ring-[#c96f4a]/30 resize-none shadow-inner leading-relaxed"
+          />
+        </div>
       </div>
     </motion.div>
   );
