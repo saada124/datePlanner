@@ -8,6 +8,7 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 
 | Version        | Folder             | What it looks like                                                                                  |
 | -------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| Spin Your Date | `spin style/`      | Carnival prize wheel: multi-select preference menu, spinning wheel with sound, respin & VIP ticket |
 | Date Menu      | `menu style/`      | A restaurant menu tasting adventure: 4 courses, scratch card, roulette, jukebox, live bill & ticket |
 | Retro RPG      | `retro style/`     | An 8-bit quest with items, XP...                                                                    |
 | Midnight       | `midnight style/`  | Stars and night sky theme and a downloadable VIP pass                                               |
@@ -18,7 +19,7 @@ Each version is its own **React 19 + TypeScript + Vite + Tailwind + Framer Motio
 | Island Getaway | `island style/`    | Animal Crossing style flight trip and a downloadable Boarding Pass                                  |
 | Café & Bistro  | `cafe style/`      | A French café menu: pick items like ordering food, get a printed receipt at the end                 |
 
-**Please note:** **Date Menu**, **Midnight**, **RetroRPG**, **Win95**, and **Watercolor** are fully stable with verified builds and WhatsApp sharing support.
+**Please note:** **Spin Your Date**, **Date Menu**, **Midnight**, **RetroRPG**, **Win95**, and **Watercolor** are fully stable with verified builds and WhatsApp sharing support.
 
 ## Screenshots 📸
 

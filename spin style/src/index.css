@@ -1,0 +1,278 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Base Carnival Midnight Theme */
+body, .theme-midnight {
+  background-color: #2E1A47;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(255, 77, 141, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(46, 230, 214, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(255, 197, 61, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 70%, rgba(255, 122, 61, 0.1) 0%, transparent 35%);
+  color: #FFF8EC;
+}
+
+/* Cotton Candy Fair Theme */
+.theme-cotton-candy {
+  background-color: #1A102E;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(244, 114, 182, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 80% 25%, rgba(56, 189, 248, 0.2) 0%, transparent 45%),
+    radial-gradient(circle at 50% 75%, rgba(253, 224, 71, 0.15) 0%, transparent 50%);
+  color: #FFFDF5;
+}
+
+/* Sunset Boardwalk Theme */
+.theme-sunset {
+  background-color: #2A1015;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 80% 30%, rgba(234, 88, 12, 0.2) 0%, transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.18) 0%, transparent 50%);
+  color: #FFF9F2;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-attachment: fixed;
+  font-family: 'Nunito', 'DM Sans', system-ui, sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Carnival Typography */
+.font-display {
+  font-family: 'Fredoka', 'Baloo 2', cursive, sans-serif;
+}
+
+.font-mono-ticket {
+  font-family: 'Space Mono', Courier, monospace;
+}
+
+/* 3D Arcade Buttons */
+.btn-arcade {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', 'Baloo 2', cursive, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+  border: 3px solid rgba(0, 0, 0, 0.4);
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-arcade:active {
+  transform: translateY(4px);
+}
+
+.btn-arcade-lime {
+  background: linear-gradient(180deg, #D4FF70 0%, #B4FF3D 60%, #8FE610 100%);
+  color: #1A3403;
+  box-shadow: 0 6px 0 #5E9B06, 0 12px 25px rgba(180, 255, 61, 0.4);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.btn-arcade-lime:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 7px 0 #5E9B06, 0 15px 30px rgba(180, 255, 61, 0.55);
+}
+
+.btn-arcade-lime:active {
+  box-shadow: 0 2px 0 #5E9B06, 0 4px 10px rgba(180, 255, 61, 0.3);
+}
+
+.btn-arcade-pink {
+  background: linear-gradient(180deg, #FF75A8 0%, #FF4D8D 60%, #E6286E 100%);
+  color: #FFFFFF;
+  box-shadow: 0 6px 0 #9E1044, 0 12px 25px rgba(255, 77, 141, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-arcade-pink:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 7px 0 #9E1044, 0 15px 30px rgba(255, 77, 141, 0.55);
+}
+
+.btn-arcade-pink:active {
+  box-shadow: 0 2px 0 #9E1044, 0 4px 10px rgba(255, 77, 141, 0.3);
+}
+
+.btn-arcade-secondary {
+  background: linear-gradient(180deg, #5D378B 0%, #462370 100%);
+  color: #FFF8EC;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 5px 0 #281144, 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.btn-arcade-secondary:hover {
+  background: linear-gradient(180deg, #6B409E 0%, #512B80 100%);
+}
+
+.btn-arcade-secondary:active {
+  box-shadow: 0 2px 0 #281144, 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-arcade:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4) !important;
+  filter: grayscale(0.6);
+}
+
+/* Shiny Bevel Pill Chips */
+.chip-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.15rem;
+  border-radius: 9999px;
+  font-family: 'Fredoka', 'Baloo 2', cursive, sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  border: 2px solid rgba(107, 63, 166, 0.5);
+  background: rgba(46, 26, 71, 0.7);
+  color: #D8CEE3;
+  backdrop-filter: blur(8px);
+}
+
+.chip-toggle:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #FFF8EC;
+}
+
+.chip-toggle:active {
+  transform: scale(0.96);
+}
+
+.chip-selected-0 {
+  background: linear-gradient(135deg, #FF6B9F 0%, #FF4D8D 100%) !important;
+  border-color: #FFA3C3 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 15px rgba(255, 77, 141, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.chip-selected-1 {
+  background: linear-gradient(135deg, #FFD15C 0%, #FFC53D 100%) !important;
+  border-color: #FFE699 !important;
+  color: #2E1A47 !important;
+  box-shadow: 0 4px 15px rgba(255, 197, 61, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.chip-selected-2 {
+  background: linear-gradient(135deg, #5CF0E4 0%, #2EE6D6 100%) !important;
+  border-color: #9EFFF7 !important;
+  color: #103B37 !important;
+  box-shadow: 0 4px 15px rgba(46, 230, 214, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.chip-selected-3 {
+  background: linear-gradient(135deg, #FF9564 0%, #FF7A3D 100%) !important;
+  border-color: #FFB894 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 15px rgba(255, 122, 61, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Carnival Card Styles */
+.carnival-card {
+  background: linear-gradient(180deg, rgba(61, 34, 94, 0.95) 0%, rgba(46, 26, 71, 0.95) 100%);
+  border: 2px solid rgba(107, 63, 166, 0.6);
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 35px -5px rgba(18, 7, 30, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+/* Slot Machine Cabinet */
+.slot-cabinet {
+  background: linear-gradient(180deg, #571B88 0%, #351056 60%, #200636 100%);
+  border: 6px solid #FFD15C;
+  box-shadow: 0 0 35px rgba(255, 209, 92, 0.4), 0 25px 50px rgba(0, 0, 0, 0.7);
+  border-radius: 2rem;
+}
+
+.slot-reel-window {
+  background: #FFFDF9;
+  border: 4px solid #D99B16;
+  box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 -10px 20px rgba(0, 0, 0, 0.6);
+  border-radius: 1.25rem;
+}
+
+/* VIP Ticket Styling */
+.ticket-wrapper {
+  position: relative;
+  background: #FFFDF9;
+  color: #2E1A47;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 209, 92, 0.3);
+}
+
+/* Jagged Tear-off Perforated Edge */
+.ticket-tear-line {
+  position: relative;
+  border-top: 2px dashed #C8B6DC;
+  margin: 1.25rem 0;
+}
+
+.ticket-tear-line::before,
+.ticket-tear-line::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background-color: #2E1A47;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.ticket-tear-line::before {
+  left: -20px;
+}
+
+.ticket-tear-line::after {
+  right: -20px;
+}
+
+/* Carnival Marquee Bulbs */
+.marquee-bulb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFD15C;
+  box-shadow: 0 0 8px #FFD15C, 0 0 14px rgba(255, 209, 92, 0.8);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1E0E32;
+}
+::-webkit-scrollbar-thumb {
+  background: #5B378B;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7E4DBB;
+}
